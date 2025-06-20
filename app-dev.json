@@ -53,7 +53,8 @@
         "USE_FINGERPRINT",
         "READ_CALENDAR",
         "WRITE_CALENDAR"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "webpack",
@@ -106,6 +107,7 @@
       "**/*"
     ],
     "notification": {
+      "icon": "./assets/images/notification-icon.png",
       "color": "#FF6B6B",
       "iosDisplayInForeground": true,
       "androidMode": "default",
