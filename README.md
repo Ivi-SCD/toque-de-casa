@@ -1,50 +1,100 @@
-# Welcome to your Expo app 👋
+# 🍳 Toque de Casa: A receita que salva vidas.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+![Banner do App](./assets/images/icon.png)
 
-## Get started
+**"Imagine baixar um app de receitas e descobrir que ele pode salvar sua vida."**
 
-1. Install dependencies
+O **Toque de Casa** é o primeiro aplicativo do Brasil que utiliza uma camuflagem perfeita para proteger mulheres em situação de violência doméstica. Na superfície, é um aplicativo de receitas culinárias funcional e convincente. Por baixo, é uma poderosa ferramenta de segurança, invisível aos olhos de um agressor.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+##  Camuflagem Perfeita
 
-   ```bash
-   npx expo start
-   ```
+A genialidade do Toque de Casa está em sua dupla camada. Para o mundo exterior e, mais importante, para um possível agressor, ele é apenas mais um app de receitas. No entanto, com um gesto secreto — **manter o dedo pressionado por 5 segundos em uma área específica** — a usuária acessa um ecossistema completo de proteção e apoio.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## ✨ Funcionalidades de Proteção (Disfarçadas de Culinária)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Cada funcionalidade foi meticulosamente desenhada para parecer parte de um aplicativo de culinária, enquanto oferece um recurso de segurança real.
 
-## Get a fresh project
+### 1. **Quiz de Avaliação de Risco ("Verificador de Utensílios")**
+-   **Disfarce:** Um "quiz culinário" para verificar se a usuária tem os "utensílios necessários".
+-   **Realidade:** Uma tradução completa do **Formulário Nacional de Avaliação de Risco**. Perguntas como *"Você tem todos os utensílios necessários?"* são, na verdade, *"Seu parceiro controla seus recursos financeiros?"*. As respostas são analisadas por uma IA para identificar o nível de risco, sempre se comunicando através de metáforas culinárias.
 
-When you're ready, run:
+### 2. **Mapa da Rede de Apoio ("Onde Comprar")**
+-   **Disfarce:** Um mapa que mostra "pontos gastronômicos" como mercados, feiras e padarias.
+-   **Realidade:** Um mapeamento georreferenciado da rede de proteção do DF. O CREAS se torna o "Mercado Central", a Delegacia da Mulher é a "Feira Orgânica", e o CAPS é a "Padaria Artesanal", mostrando rotas seguras para o local de acolhimento mais próximo.
 
-```bash
-npm run reset-project
-```
+### 3. **Chat Seguro ("Grupo de Receitas")**
+-   **Disfarce:** Um grupo de chat para trocar dicas e receitas.
+-   **Realidade:** Um canal de comunicação seguro com códigos de alerta que salvam vidas.
+    -   `"Preciso de sal"`: Aciona o protocolo para violência psicológica.
+    -   `"Queimei o jantar"`: Indica uma escalada de violência física.
+    -   `"Vou fazer um bolo"`: Sinaliza a necessidade de uma saída de emergência.
+-   A IA responde mantendo o disfarce enquanto alerta discretamente a rede de apoio da usuária.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 4. **Mentoria ("Cozinheiras Experientes")**
+-   **Disfarce:** Uma seção para receber dicas de "cozinheiras experientes".
+-   **Realidade:** Uma rede de mentoras reais — mulheres que sobreviveram a situações de violência e agora oferecem orientação e apoio para outras, mantendo sempre a narrativa culinária como fachada.
 
-## Learn more
+### 5. **Botão de Pânico ("Modo Limpeza")**
+-   **Disfarce:** Uma funcionalidade para "limpar o cache de receitas".
+-   **Realidade:** Um botão de pânico que apaga todos os rastros de uso da parte de segurança do app, revertendo-o para um simples app de receitas sem comprometer seu funcionamento normal.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🔒 Segurança e Privacidade
 
-## Join the community
+-   **Criptografia de Ponta a Ponta:** Todas as comunicações são seguras.
+-   **Anonimato:** O sistema foi projetado para não coletar dados pessoais identificáveis.
+-   **Backup Seguro:** As informações são salvas de forma segura na nuvem.
+-   **Funcionalidade Offline:** Recursos essenciais funcionam mesmo sem conexão com a internet.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🚀 Executando o Projeto Localmente
+
+**Aviso Importante:** Este é um projeto de alta sensibilidade. Ao executá-lo, lembre-se do seu propósito e da segurança dos dados.
+
+### Pré-requisitos
+
+1.  **Node.js e NPM:** [Baixe aqui](https://nodejs.org/).
+2.  **Java Development Kit (JDK):** Recomendado JDK 17. [Baixe aqui (Adoptium)](https://adoptium.net/temurin/releases/?version=17).
+3.  **Android Studio:** Para o SDK do Android e emulador. [Baixe aqui](https://developer.android.com/studio).
+4.  Configure as variáveis de ambiente `JAVA_HOME` e `ANDROID_HOME`.
+
+### Instalação e Execução
+
+1.  **Clone o repositório e instale as dependências:**
+    ```sh
+    git clone https://github.com/Ivi-SCD/toque-de-casa.git
+    cd toque-de-casa
+    npm install
+    ```
+
+2.  **Para rodar com Expo Go (Desenvolvimento Rápido):**
+    ```sh
+    npx expo start
+    ```
+    Escaneie o QR Code com o app Expo Go. (Funcionalidades nativas podem ser limitadas).
+
+3.  **Para rodar um Build de Desenvolvimento Completo (Recomendado):**
+    ```sh
+    npx expo run:android
+    ```
+    Este comando compila o aplicativo completo e o instala em seu emulador ou dispositivo conectado. É a maneira correta de testar todas as funcionalidades.
+
+---
+
+## 🤝 Contribuição
+
+Este é um projeto desenvolvido no [Hackathon da Campus Party Brasilia 2025](https://brasil.campus-party.org/cpbr17/hackathons/desafio-mulher-mais-segura/) com uma missão crítica. Se você deseja contribuir, por favor, abra uma *issue* para discutir suas ideias ou um *pull request* com suas melhorias.
+
+#
+
+*Uma pequena dedicatória no final*
+
+> Mais um hackathon desenvolvendo uma solução ao lado dessa pessoa incrível chamada **Daniela dos Anjos**, foi numa Campus Party que nos conhecemos e trabalhamos juntos desde lá, e cá estamos mais uma vez desenvolvendo soluções em outra Campus Party, sempre com o propósito da inovação e ajudar as outras pessoas, vamos ainda participar e desenvolver muitas soluções juntos, sou eternamente grato por ter te conhecido e a gente ter desenvolvido essa amizade no meio de todo esse ecossistema maravilhoso hehe ✨✨ dos hackathons, da inovação, da tecnologia para a vida 💕💕
+
+*Aos avaliadores, peço que ignorem a mensagem acima para avaliação hahaha!!*
