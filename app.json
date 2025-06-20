@@ -8,11 +8,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "toquedecasa",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "backgroundColor": "#FFFFFF",
     "primaryColor": "#FF6B6B",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#FF6B6B"
     },
