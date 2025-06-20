@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Linking,
   Modal,
@@ -76,6 +76,78 @@ const supportLocations: SupportLocation[] = [
     longitude: -48.1150,
     description: 'Atendimento psicológico e psiquiátrico',
   },
+  {
+    id: '5',
+    name: 'Mercadinho Comunitário',
+    realName: 'CRAS Ceilândia Norte',
+    type: 'creas',
+    address: 'QNM 15 - Ceilândia Norte',
+    phone: '(61) 3372-9955',
+    hours: 'Seg-Sex: 8h-17h',
+    latitude: -15.8205,
+    longitude: -48.1052,
+    description: 'Centro de Referência de Assistência Social da Ceilândia Norte',
+  },
+  {
+    id: '6',
+    name: 'Super Feira Regional',
+    realName: 'Hospital Regional de Ceilândia (HRC)',
+    type: 'emergency',
+    address: 'Área Especial QNM 17 - Ceilândia Norte',
+    phone: '(61) 3471-9900',
+    hours: '24 horas',
+    latitude: -15.8142,
+    longitude: -48.1023,
+    description: 'Hospital de atendimento de média e alta complexidade',
+  },
+  {
+    id: '7',
+    name: 'Espaço Bem-Estar',
+    realName: 'UBS 08 - Ceilândia',
+    type: 'health',
+    address: 'QNM 13 Conjunto G',
+    phone: '(61) 3371-9920',
+    hours: 'Seg-Sex: 7h-19h',
+    latitude: -15.8178,
+    longitude: -48.1087,
+    description: 'Unidade Básica de Saúde com atendimento clínico geral',
+  },
+  {
+    id: '8',
+    name: 'Feira Gastronômica',
+    realName: 'Centro de Convivência - Ceilândia',
+    type: 'deam',
+    address: 'QNM 26 - Ceilândia Norte',
+    phone: '(61) 3371-9911',
+    hours: 'Seg-Sex: 8h-18h',
+    latitude: -15.8153,
+    longitude: -48.1049,
+    description: 'Espaço para atividades de apoio social e comunitário',
+  },
+  {
+    id: '9',
+    name: 'Armazém Popular',
+    realName: 'CREAS Expansão do Setor O',
+    type: 'creas',
+    address: 'QNO 18 - Expansão do Setor O',
+    phone: '(61) 3371-9988',
+    hours: 'Seg-Sex: 8h-18h',
+    latitude: -15.8320,
+    longitude: -48.1180,
+    description: 'Centro especializado de assistência social',
+  },
+  {
+    id: '10',
+    name: 'Mercado Noturno',
+    realName: 'UPA Samambaia',
+    type: 'emergency',
+    address: 'QS 07 - Samambaia Sul',
+    phone: '(61) 3358-9900',
+    hours: '24 horas',
+    latitude: -15.8660,
+    longitude: -48.0710,
+    description: 'Unidade de Pronto Atendimento com plantão 24h',
+  }
 ];
 
 const typeIcons = {
