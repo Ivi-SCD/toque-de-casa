@@ -35,7 +35,6 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundImage": "./assets/images/adaptive-icon-background.png",
         "backgroundColor": "#FF6B6B"
       },
       "package": "com.toquedecasa.app",
@@ -64,9 +63,7 @@
       "expo-secure-store",
       "expo-location",
       "expo-camera",
-      "expo-av",
       "expo-image-picker",
-      "expo-notifications",
       "expo-local-authentication",
       "expo-calendar",
       "expo-document-picker",
@@ -83,7 +80,9 @@
             "deploymentTarget": "15.1"
           }
         }
-      ]
+      ],
+      "expo-audio",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

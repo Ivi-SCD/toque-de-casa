@@ -12,7 +12,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, UrlTile } from 'react-native-maps';
 
 interface SupportLocation {
   id: string;
@@ -257,36 +257,40 @@ export default function MapScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      <MapView
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={{
-          latitude: -15.8267,
-          longitude: -48.0606,
-          latitudeDelta: 0.2,
-          longitudeDelta: 0.2,
-        }}
-        showsUserLocation={true}
-      >
-        {filteredLocations.map((location) => (
-          <Marker
-            key={location.id}
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            onPress={() => handleLocationPress(location)}
-          >
-            <ThemedView style={[styles.markerContainer, { backgroundColor: typeIcons[location.type].color }]}>
-              <MaterialIcons 
-                name={typeIcons[location.type].icon as any} 
-                size={24} 
-                color="white" 
-              />
-            </ThemedView>
-          </Marker>
-        ))}
-      </MapView>
+      {location && (
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        >
+          <UrlTile
+            urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maximumZ={19}
+          />
+          {filteredLocations.map((location) => (
+            <Marker
+              key={location.id}
+              coordinate={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }}
+              onPress={() => handleLocationPress(location)}
+            >
+              <ThemedView style={[styles.markerContainer, { backgroundColor: typeIcons[location.type].color }]}>
+                <MaterialIcons 
+                  name={typeIcons[location.type].icon as any} 
+                  size={24} 
+                  color="white" 
+                />
+              </ThemedView>
+            </Marker>
+          ))}
+        </MapView>
+      )}
 
       <Modal
         animationType="slide"
