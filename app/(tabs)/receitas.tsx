@@ -3,8 +3,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -33,6 +34,22 @@ const recipes: Recipe[] = [
   { id: '2', title: 'Brigadeiro Gourmet', time: '20 min', difficulty: 'Fácil', category: 'sobremesas', image: '🍫' },
   { id: '3', title: 'Salada Caesar', time: '15 min', difficulty: 'Fácil', category: 'saudaveis', image: '🥗' },
   { id: '4', title: 'Bolo de Cenoura', time: '45 min', difficulty: 'Médio', category: 'especiais', image: '🥕' },
+  { id: '5', title: 'Lasanha de Berinjela', time: '1h 10min', difficulty: 'Difícil', category: 'saudaveis', image: '🍆' },
+  { id: '6', title: 'Mousse de Maracujá', time: '25 min', difficulty: 'Fácil', category: 'sobremesas', image: '🍮' },
+  { id: '7', title: 'Frango Xadrez', time: '35 min', difficulty: 'Médio', category: 'rapidas', image: '🍗' },
+  { id: '8', title: 'Torta de Limão', time: '50 min', difficulty: 'Médio', category: 'sobremesas', image: '🥧' },
+  { id: '9', title: 'Macarrão Carbonara', time: '25 min', difficulty: 'Fácil', category: 'rapidas', image: '🍝' },
+  { id: '10', title: 'Pão de Queijo', time: '40 min', difficulty: 'Fácil', category: 'especiais', image: '🧀' },
+  { id: '11', title: 'Feijoada', time: '2h 30min', difficulty: 'Difícil', category: 'especiais', image: '🍛' },
+  { id: '12', title: 'Panqueca de Aveia', time: '20 min', difficulty: 'Fácil', category: 'saudaveis', image: '🥞' },
+  { id: '13', title: 'Pudim de Leite', time: '1h 30min', difficulty: 'Médio', category: 'sobremesas', image: '🍮' },
+  { id: '14', title: 'Strogonoff de Frango', time: '40 min', difficulty: 'Fácil', category: 'rapidas', image: '🍗' },
+  { id: '15', title: 'Quiche de Alho-Poró', time: '1h', difficulty: 'Médio', category: 'especiais', image: '🥧' },
+  { id: '16', title: 'Escondidinho de Carne', time: '1h 20min', difficulty: 'Médio', category: 'especiais', image: '🥘' },
+  { id: '17', title: 'Smoothie Detox', time: '10 min', difficulty: 'Fácil', category: 'saudaveis', image: '🥤' },
+  { id: '18', title: 'Tapioca com Coco', time: '15 min', difficulty: 'Fácil', category: 'saudaveis', image: '🥥' },
+  { id: '19', title: 'Arroz Carreteiro', time: '50 min', difficulty: 'Médio', category: 'rapidas', image: '🍚' },
+  { id: '20', title: 'Brownie de Chocolate', time: '35 min', difficulty: 'Médio', category: 'sobremesas', image: '🍫' },
 ];
 
 export default function RecipesScreen() {
@@ -41,13 +58,21 @@ export default function RecipesScreen() {
   const [isHolding, setIsHolding] = useState(false);
   const holdTimer = useRef<number | null>(null);
   const startTime = useRef<number>(0);
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   const handlePressIn = (categoryId: string) => {
     if (categoryId === 'especiais') {
       startTime.current = Date.now();
       setIsHolding(true);
       
+      Animated.timing(progressAnim, {
+        toValue: 100,
+        duration: 5000,
+        useNativeDriver: false,
+      }).start();
+      
       holdTimer.current = setTimeout(() => {
+        console.log('5 segundos completos! Ativando acesso secreto...');
         Vibration.vibrate(100);
         handleSecretAccess();
       }, 5000);
@@ -59,16 +84,35 @@ export default function RecipesScreen() {
       clearTimeout(holdTimer.current);
       holdTimer.current = null;
     }
+    progressAnim.setValue(0);
     setIsHolding(false);
   };
 
   const handleSecretAccess = async () => {
-    // Salvar estado de acesso seguro
-    await AsyncStorage.setItem('secretAccess', 'true');
-    router.push('/avaliacao');
+    try {
+      // Salvar estado de acesso seguro
+      await AsyncStorage.setItem('secretAccess', 'true');
+      console.log('Acesso secreto ativado! Navegando para avaliação...');
+      
+      // Resetar estado
+      setIsHolding(false);
+      if (holdTimer.current) {
+        clearTimeout(holdTimer.current);
+        holdTimer.current = null;
+      }
+      
+      // Navegar para a tela de avaliação
+      router.push('/avaliacao');
+    } catch (error) {
+      console.error('Erro ao ativar acesso secreto:', error);
+    }
   };
 
   const handleCategoryPress = (categoryId: string) => {
+    // Se estiver segurando, não muda a categoria
+    if (isHolding && categoryId === 'especiais') {
+      return;
+    }
     setSelectedCategory(categoryId);
   };
 
