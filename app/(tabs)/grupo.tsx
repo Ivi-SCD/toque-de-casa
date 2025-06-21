@@ -16,20 +16,32 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar um contato de emergência
+ * Define a estrutura dos contatos que podem ser notificados
+ */
 interface Contact {
-  id: string;
-  name: string;
-  phone: string;
-  alertLevel: 'high' | 'medium' | 'low';
+  id: string;           // Identificador único
+  name: string;         // Nome do contato
+  phone: string;        // Número de telefone
+  alertLevel: 'high' | 'medium' | 'low'; // Nível de prioridade para alertas
 }
 
+/**
+ * Interface para representar uma mensagem no chat
+ * Define a estrutura das mensagens trocadas
+ */
 interface Message {
-  id: string;
-  text: string;
-  timestamp: Date;
-  sender: 'user' | 'system' | 'mentor';
+  id: string;           // Identificador único
+  text: string;         // Conteúdo da mensagem
+  timestamp: Date;      // Data/hora da mensagem
+  sender: 'user' | 'system' | 'mentor'; // Remetente da mensagem
 }
 
+/**
+ * Códigos de emergência disfarçados como frases culinárias
+ * Cada código tem um significado específico e aciona diferentes protocolos
+ */
 const emergencyCodes = {
   'Preciso de sal': { 
     meaning: 'Violência psicológica',
@@ -58,6 +70,31 @@ const emergencyCodes = {
   },
 };
 
+/**
+ * Tela de Grupo - Sistema de Comunicação Segura Disfarçado
+ * 
+ * Esta tela apresenta um "grupo de receitas" que na verdade é um sistema
+ * de comunicação segura com códigos de emergência e rede de apoio.
+ * 
+ * Funcionalidades:
+ * - Chat disfarçado com códigos de emergência
+ * - Gerenciamento de contatos de emergência
+ * - Sistema de mentoria
+ * - Detecção automática de códigos de alerta
+ * - Notificação discreta de contatos
+ * 
+ * Abas Disponíveis:
+ * - Chat: Comunicação com códigos secretos
+ * - Contatos: Gerenciamento de rede de apoio
+ * - Mentora: Conexão com mentoras experientes
+ * 
+ * Códigos de Emergência:
+ * - "Preciso de sal" = Violência psicológica
+ * - "Queimei o jantar" = Escalada para violência física
+ * - "Vou fazer um bolo" = Necessito sair urgentemente
+ * - "Receita não deu certo" = Necessito conversar
+ * - "Faltou tempero" = Preciso de orientação
+ */
 export default function GroupScreen() {
   const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState<'chat' | 'contacts' | 'mentor'>('chat');
@@ -74,10 +111,16 @@ export default function GroupScreen() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [newContact, setNewContact] = useState({ name: '', phone: '', alertLevel: 'medium' as 'high' | 'medium' | 'low' });
 
+  /**
+   * Carrega contatos salvos do AsyncStorage ao iniciar
+   */
   useEffect(() => {
     loadContacts();
   }, []);
 
+  /**
+   * Carrega contatos de emergência do armazenamento local
+   */
   const loadContacts = async () => {
     try {
       const savedContacts = await AsyncStorage.getItem('emergencyContacts');
@@ -89,6 +132,11 @@ export default function GroupScreen() {
     }
   };
 
+  /**
+   * Salva contatos de emergência no armazenamento local
+   * 
+   * @param updatedContacts - Lista atualizada de contatos
+   */
   const saveContacts = async (updatedContacts: Contact[]) => {
     try {
       await AsyncStorage.setItem('emergencyContacts', JSON.stringify(updatedContacts));
@@ -98,6 +146,10 @@ export default function GroupScreen() {
     }
   };
 
+  /**
+   * Envia uma mensagem no chat
+   * Verifica automaticamente se contém códigos de emergência
+   */
   const sendMessage = () => {
     if (!inputText.trim()) return;
 
@@ -110,7 +162,7 @@ export default function GroupScreen() {
 
     setMessages([...messages, newMessage]);
 
-    // Check for emergency codes
+    // Verifica se a mensagem contém códigos de emergência
     Object.entries(emergencyCodes).forEach(([code, info]) => {
       if (inputText.toLowerCase().includes(code.toLowerCase())) {
         handleEmergencyCode(code, info);
@@ -120,8 +172,15 @@ export default function GroupScreen() {
     setInputText('');
   };
 
+  /**
+   * Processa códigos de emergência detectados
+   * Envia resposta automática e notifica contatos se necessário
+   * 
+   * @param code - Código de emergência detectado
+   * @param info - Informações do código (significado, severidade, resposta)
+   */
   const handleEmergencyCode = async (code: string, info: typeof emergencyCodes[keyof typeof emergencyCodes]) => {
-    // Send automatic response
+    // Envia resposta automática da mentora
     const responseMessage: Message = {
       id: (Date.now() + 1).toString(),
       text: info.response,
@@ -130,7 +189,7 @@ export default function GroupScreen() {
     };
     setMessages(prev => [...prev, responseMessage]);
 
-    // If critical, send alerts to emergency contacts
+    // Se for crítico, notifica contatos de emergência
     if (info.severity === 'critical' && contacts.length > 0) {
       const location = await Location.getCurrentPositionAsync({});
       const highPriorityContacts = contacts.filter(c => c.alertLevel === 'high');
@@ -143,6 +202,10 @@ export default function GroupScreen() {
     }
   };
 
+  /**
+   * Adiciona um novo contato de emergência
+   * Valida os campos obrigatórios antes de salvar
+   */
   const addContact = () => {
     if (!newContact.name || !newContact.phone) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -159,6 +222,12 @@ export default function GroupScreen() {
     setShowContactModal(false);
   };
 
+  /**
+   * Remove um contato de emergência
+   * Solicita confirmação antes de deletar
+   * 
+   * @param id - ID do contato a ser removido
+   */
   const deleteContact = (id: string) => {
     Alert.alert(
       'Remover Contato',
@@ -179,6 +248,7 @@ export default function GroupScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <ThemedText type="title">Grupo de Receitas</ThemedText>
         <ThemedText style={styles.subtitle}>
@@ -186,6 +256,7 @@ export default function GroupScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Navegação por abas */}
       <ThemedView style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'chat' && styles.activeTab]}
@@ -216,8 +287,10 @@ export default function GroupScreen() {
         </TouchableOpacity>
       </ThemedView>
 
+      {/* Aba de Chat */}
       {activeTab === 'chat' && (
         <>
+          {/* Container de mensagens */}
           <ScrollView style={styles.messagesContainer}>
             {messages.map((message) => (
               <ThemedView
@@ -248,6 +321,7 @@ export default function GroupScreen() {
               </ThemedView>
             ))}
           </ScrollView>
+          {/* Campo de entrada de mensagem */}
           <ThemedView style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
             <TextInput
               style={[styles.input, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
@@ -264,8 +338,10 @@ export default function GroupScreen() {
         </>
       )}
 
+      {/* Aba de Contatos */}
       {activeTab === 'contacts' && (
         <ScrollView style={styles.contactsContainer}>
+          {/* Botão para adicionar novo contato */}
           <TouchableOpacity
             style={[styles.addButton, { backgroundColor: '#4CAF50' }]}
             onPress={() => setShowContactModal(true)}
@@ -274,6 +350,7 @@ export default function GroupScreen() {
             <ThemedText style={styles.addButtonText}>Adicionar Contato</ThemedText>
           </TouchableOpacity>
 
+          {/* Lista de contatos */}
           {contacts.map((contact) => (
             <ThemedView
               key={contact.id}
@@ -282,6 +359,7 @@ export default function GroupScreen() {
               <ThemedView style={styles.contactInfo}>
                 <ThemedText style={styles.contactName}>{contact.name}</ThemedText>
                 <ThemedText style={styles.contactPhone}>{contact.phone}</ThemedText>
+                {/* Badge de nível de alerta */}
                 <ThemedView style={[styles.alertBadge, 
                   { backgroundColor: 
                     contact.alertLevel === 'high' ? '#FF0000' :
@@ -302,6 +380,7 @@ export default function GroupScreen() {
         </ScrollView>
       )}
 
+      {/* Aba de Mentora */}
       {activeTab === 'mentor' && (
         <ThemedView style={styles.mentorContainer}>
           <MaterialIcons name="psychology" size={80} color="#4CAF50" />
@@ -315,6 +394,7 @@ export default function GroupScreen() {
         </ThemedView>
       )}
 
+      {/* Modal para adicionar contato */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -325,6 +405,7 @@ export default function GroupScreen() {
           <ThemedView style={[styles.modalContent, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
             <ThemedText style={styles.modalTitle}>Adicionar Contato</ThemedText>
             
+            {/* Campo de nome */}
             <TextInput
               style={[styles.modalInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
               placeholder="Nome"
@@ -333,6 +414,7 @@ export default function GroupScreen() {
               onChangeText={(text) => setNewContact({ ...newContact, name: text })}
             />
             
+            {/* Campo de telefone */}
             <TextInput
               style={[styles.modalInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
               placeholder="Telefone"
@@ -342,6 +424,7 @@ export default function GroupScreen() {
               onChangeText={(text) => setNewContact({ ...newContact, phone: text })}
             />
             
+            {/* Seleção de nível de alerta */}
             <ThemedText style={styles.modalLabel}>Nível de Alerta:</ThemedText>
             <ThemedView style={styles.alertLevelContainer}>
               {(['high', 'medium', 'low'] as const).map((level) => (
@@ -364,6 +447,7 @@ export default function GroupScreen() {
               ))}
             </ThemedView>
 
+            {/* Botões de ação */}
             <ThemedView style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: '#666' }]}
@@ -385,6 +469,10 @@ export default function GroupScreen() {
   );
 }
 
+/**
+ * Estilos da tela de grupo
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -414,7 +502,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#FF6B6B',
+    borderBottomColor: '#FF6B6B', // Cor coral do app
   },
   tabText: {
     fontSize: 14,
@@ -472,7 +560,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#FF6B6B', // Cor coral do app
     justifyContent: 'center',
     alignItems: 'center',
   },

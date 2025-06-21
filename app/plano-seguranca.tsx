@@ -16,21 +16,33 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar um item do plano de segurança
+ * Cada categoria tem um nome disfarçado e um nome real
+ */
 interface SafetyPlanItem {
-  id: string;
-  category: string;
-  realCategory: string;
-  items: string[];
-  completed: boolean[];
+  id: string;           // Identificador único
+  category: string;     // Nome disfarçado (ex: "Ingredientes Essenciais")
+  realCategory: string; // Nome real (ex: "Documentos Importantes")
+  items: string[];      // Lista de itens disfarçados
+  completed: boolean[]; // Status de conclusão de cada item
 }
 
+/**
+ * Interface para representar um documento importante
+ * Permite armazenar documentos digitais de forma segura
+ */
 interface ImportantDoc {
-  id: string;
-  name: string;
-  uri: string;
-  type: string;
+  id: string;       // Identificador único
+  name: string;     // Nome do documento
+  uri: string;      // URI do arquivo
+  type: string;     // Tipo MIME do arquivo
 }
 
+/**
+ * Template do plano de segurança disfarçado
+ * Cada categoria representa um aspecto diferente da preparação
+ */
 const safetyPlanTemplate: SafetyPlanItem[] = [
   {
     id: '1',
@@ -86,6 +98,35 @@ const safetyPlanTemplate: SafetyPlanItem[] = [
   },
 ];
 
+/**
+ * Tela de Plano de Segurança - Preparação Disfarçada
+ * 
+ * Esta tela apresenta um "plano de receita de emergência" que na verdade
+ * é um plano de segurança completo para situações de violência doméstica,
+ * disfarçado em linguagem culinária para manter a privacidade.
+ * 
+ * Funcionalidades:
+ * - Checklist de preparação com metáforas culinárias
+ * - Acompanhamento de progresso visual
+ * - Armazenamento de documentos importantes
+ * - Anotações pessoais seguras
+ * - Plano personalizado gerado por IA
+ * - Compartilhamento discreto de informações
+ * - Alternância entre nomes disfarçados e reais
+ * 
+ * Categorias do Plano:
+ * - "Ingredientes Essenciais" = Documentos importantes
+ * - "Utensílios de Emergência" = Kit de emergência
+ * - "Receitas Rápidas" = Plano de saída
+ * - "Rede de Fornecedores" = Rede de apoio
+ * 
+ * Recursos de Segurança:
+ * - Armazenamento local criptografado
+ * - Interface disfarçada
+ * - Compartilhamento discreto
+ * - Integração com IA para personalização
+ * - Backup automático de dados
+ */
 export default function SafetyPlanScreen() {
   const colorScheme = useColorScheme();
   const [planItems, setPlanItems] = useState<SafetyPlanItem[]>(safetyPlanTemplate);
@@ -93,10 +134,17 @@ export default function SafetyPlanScreen() {
   const [documents, setDocuments] = useState<ImportantDoc[]>([]);
   const [showRealNames, setShowRealNames] = useState(false);
 
+  /**
+   * Carrega plano salvo ao iniciar a tela
+   */
   useEffect(() => {
     loadSavedPlan();
   }, []);
 
+  /**
+   * Carrega dados salvos do AsyncStorage
+   * Restaura plano, anotações e documentos
+   */
   const loadSavedPlan = async () => {
     try {
       const savedPlan = await AsyncStorage.getItem('safetyPlan');
@@ -111,6 +159,10 @@ export default function SafetyPlanScreen() {
     }
   };
 
+  /**
+   * Salva plano atual no AsyncStorage
+   * Armazena checklist, anotações e documentos
+   */
   const savePlan = async () => {
     try {
       await AsyncStorage.setItem('safetyPlan', JSON.stringify(planItems));
@@ -123,6 +175,12 @@ export default function SafetyPlanScreen() {
     }
   };
 
+  /**
+   * Alterna status de conclusão de um item
+   * 
+   * @param categoryId - ID da categoria
+   * @param itemIndex - Índice do item na categoria
+   */
   const toggleItem = (categoryId: string, itemIndex: number) => {
     const updatedPlan = planItems.map(category => {
       if (category.id === categoryId) {
@@ -135,6 +193,10 @@ export default function SafetyPlanScreen() {
     setPlanItems(updatedPlan);
   };
 
+  /**
+   * Adiciona documento importante via seletor de arquivos
+   * Suporta imagens e PDFs
+   */
   const addDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -157,6 +219,10 @@ export default function SafetyPlanScreen() {
     }
   };
 
+  /**
+   * Compartilha plano de emergência de forma discreta
+   * Usa linguagem culinária para manter o disfarce
+   */
   const shareEmergencyPlan = async () => {
     const emergencyInfo = `
 🍳 RECEITA DE EMERGÊNCIA 🍳
@@ -189,6 +255,11 @@ Mantenha essa receita sempre à mão!
     }
   };
 
+  /**
+   * Calcula porcentagem de conclusão do plano
+   * 
+   * @returns Porcentagem de itens concluídos
+   */
   const getCompletionPercentage = () => {
     const totalItems = planItems.reduce((acc, cat) => acc + cat.items.length, 0);
     const completedItems = planItems.reduce(
@@ -198,6 +269,10 @@ Mantenha essa receita sempre à mão!
     return Math.round((completedItems / totalItems) * 100);
   };
 
+  /**
+   * Gera plano personalizado via IA
+   * Baseado no nível de risco e contexto da usuária
+   */
   const generateAIPlan = async () => {
     const userContext = {
       location: 'Ceilândia',
@@ -221,6 +296,7 @@ Mantenha essa receita sempre à mão!
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -231,6 +307,7 @@ Mantenha essa receita sempre à mão!
         </ThemedText>
       </ThemedView>
 
+      {/* Barra de progresso */}
       <ThemedView style={styles.progressContainer}>
         <ThemedView style={styles.progressBar}>
           <ThemedView 
@@ -242,6 +319,7 @@ Mantenha essa receita sempre à mão!
         </ThemedText>
       </ThemedView>
 
+      {/* Botão para alternar visibilidade dos nomes reais */}
       <TouchableOpacity
         style={[styles.toggleButton, { backgroundColor: '#FF6B6B' }]}
         onPress={() => setShowRealNames(!showRealNames)}
@@ -256,6 +334,7 @@ Mantenha essa receita sempre à mão!
         </ThemedText>
       </TouchableOpacity>
 
+      {/* Lista de categorias do plano */}
       {planItems.map((category) => (
         <ThemedView
           key={category.id}
@@ -268,6 +347,7 @@ Mantenha essa receita sempre à mão!
             )}
           </ThemedText>
           
+          {/* Itens da categoria */}
           {category.items.map((item, index) => (
             <TouchableOpacity
               key={index}
@@ -290,6 +370,7 @@ Mantenha essa receita sempre à mão!
         </ThemedView>
       ))}
 
+      {/* Seção de anotações */}
       <ThemedView style={[styles.notesCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
         <ThemedText style={styles.notesTitle}>Anotações da Receita</ThemedText>
         <TextInput
@@ -303,9 +384,11 @@ Mantenha essa receita sempre à mão!
         />
       </ThemedView>
 
+      {/* Seção de documentos */}
       <ThemedView style={[styles.documentsCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
         <ThemedText style={styles.documentsTitle}>Receitas Importantes</ThemedText>
         
+        {/* Lista de documentos */}
         {documents.map((doc) => (
           <ThemedView key={doc.id} style={styles.documentItem}>
             <MaterialIcons name="description" size={24} color="#666" />
@@ -318,6 +401,7 @@ Mantenha essa receita sempre à mão!
           </ThemedView>
         ))}
 
+        {/* Botão para adicionar documento */}
         <TouchableOpacity
           style={[styles.addDocButton, { backgroundColor: '#4CAF50' }]}
           onPress={addDocument}
@@ -327,6 +411,7 @@ Mantenha essa receita sempre à mão!
         </TouchableOpacity>
       </ThemedView>
 
+      {/* Botões de ação */}
       <ThemedView style={styles.actionButtons}>
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#2196F3' }]}
@@ -356,6 +441,10 @@ Mantenha essa receita sempre à mão!
   );
 }
 
+/**
+ * Estilos da tela de plano de segurança
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -366,7 +455,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {
@@ -386,7 +475,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAF50', // Verde para progresso
     borderRadius: 4,
   },
   progressText: {

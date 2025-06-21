@@ -12,15 +12,23 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar uma pergunta do quiz
+ * Define a estrutura das perguntas educativas
+ */
 interface Question {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-  category: string;
+  id: string;           // Identificador único
+  question: string;     // Pergunta disfarçada em linguagem culinária
+  options: string[];    // Opções de resposta
+  correctAnswer: number; // Índice da resposta correta
+  explanation: string;  // Explicação educativa da resposta
+  category: string;     // Categoria da pergunta (sinais, direitos, seguranca)
 }
 
+/**
+ * Perguntas do quiz educativo disfarçado
+ * Cada pergunta ensina sobre violência doméstica usando metáforas culinárias
+ */
 const questions: Question[] = [
   {
     id: '1',
@@ -89,6 +97,34 @@ const questions: Question[] = [
   },
 ];
 
+/**
+ * Tela de Quiz - Teste Educativo Disfarçado
+ * 
+ * Esta tela apresenta um "quiz de culinária" que na verdade é um
+ * teste educativo sobre violência doméstica, direitos das mulheres
+ * e estratégias de segurança, disfarçado em perguntas sobre cozinha.
+ * 
+ * Funcionalidades:
+ * - Perguntas progressivas com metáforas culinárias
+ * - Sistema de pontuação em tempo real
+ * - Explicações educativas para cada resposta
+ * - Categorização por temas (sinais, direitos, segurança)
+ * - Conquistas por alto desempenho
+ * - Feedback visual imediato
+ * - Progresso visual do quiz
+ * 
+ * Categorias de Perguntas:
+ * - "Reconhecendo Sinais" = Identificação de violência
+ * - "Seus Direitos" = Conhecimento sobre direitos legais
+ * - "Segurança Pessoal" = Estratégias de proteção
+ * 
+ * Objetivos Educativos:
+ * - Conscientização sobre violência doméstica
+ * - Aprendizado sobre direitos e leis
+ * - Desenvolvimento de estratégias de segurança
+ * - Fortalecimento da autonomia feminina
+ * - Gamificação para engajamento
+ */
 export default function QuizScreen() {
   const colorScheme = useColorScheme();
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -99,34 +135,51 @@ export default function QuizScreen() {
     new Array(questions.length).fill(false)
   );
 
+  /**
+   * Processa a resposta selecionada pelo usuário
+   * Mostra feedback visual e explicação educativa
+   * 
+   * @param answerIndex - Índice da resposta selecionada
+   */
   const handleAnswer = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
     setShowExplanation(true);
 
+    // Verifica se a resposta está correta e ainda não foi respondida
     const isCorrect = answerIndex === questions[currentQuestion].correctAnswer;
     if (isCorrect && !answeredQuestions[currentQuestion]) {
       setScore(score + 1);
     }
 
+    // Marca a pergunta como respondida
     const newAnswered = [...answeredQuestions];
     newAnswered[currentQuestion] = true;
     setAnsweredQuestions(newAnswered);
   };
 
+  /**
+   * Avança para próxima pergunta ou finaliza o quiz
+   */
   const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
+      // Avança para próxima pergunta
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
+      // Finaliza o quiz
       finishQuiz();
     }
   };
 
+  /**
+   * Finaliza o quiz e apresenta resultados
+   * Salva conquista se o desempenho for alto
+   */
   const finishQuiz = async () => {
     const percentage = Math.round((score / questions.length) * 100);
     
-    // Save achievement if high score
+    // Salva conquista se pontuação alta (80% ou mais)
     if (percentage >= 80) {
       const achievements = await AsyncStorage.getItem('achievements');
       const currentAchievements = achievements ? JSON.parse(achievements) : [];
@@ -143,6 +196,7 @@ export default function QuizScreen() {
       await AsyncStorage.setItem('achievements', JSON.stringify(currentAchievements));
     }
 
+    // Apresenta resultado final
     Alert.alert(
       'Quiz Concluído!',
       `Você acertou ${score} de ${questions.length} perguntas (${percentage}%)`,
@@ -154,6 +208,7 @@ export default function QuizScreen() {
         {
           text: 'Refazer',
           onPress: () => {
+            // Reinicia o quiz
             setCurrentQuestion(0);
             setScore(0);
             setSelectedAnswer(null);
@@ -170,6 +225,7 @@ export default function QuizScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -180,6 +236,7 @@ export default function QuizScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Barra de progresso e pontuação */}
       <ThemedView style={styles.progressContainer}>
         <ThemedView style={styles.progressBar}>
           <ThemedView style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -194,7 +251,9 @@ export default function QuizScreen() {
         </ThemedView>
       </ThemedView>
 
+      {/* Card da pergunta atual */}
       <ThemedView style={[styles.questionCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
+        {/* Badge da categoria */}
         <ThemedView style={styles.categoryBadge}>
           <ThemedText style={styles.categoryText}>
             {question.category === 'sinais' ? 'Reconhecendo Sinais' :
@@ -203,8 +262,10 @@ export default function QuizScreen() {
           </ThemedText>
         </ThemedView>
 
+        {/* Texto da pergunta */}
         <ThemedText style={styles.questionText}>{question.question}</ThemedText>
 
+        {/* Opções de resposta */}
         {question.options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const isCorrect = index === question.correctAnswer;
@@ -219,8 +280,8 @@ export default function QuizScreen() {
                 showResult && isCorrect && styles.correctOption,
                 showResult && isSelected && !isCorrect && styles.wrongOption,
                 { backgroundColor: 
-                  showResult && isCorrect ? '#4CAF50' :
-                  showResult && isSelected && !isCorrect ? '#FF6B6B' :
+                  showResult && isCorrect ? '#4CAF50' : // Verde para resposta correta
+                  showResult && isSelected && !isCorrect ? '#FF6B6B' : // Vermelho para resposta errada
                   colorScheme === 'dark' ? '#3A3A3A' : '#F5F5F5'
                 }
               ]}
@@ -233,6 +294,7 @@ export default function QuizScreen() {
               ]}>
                 {option}
               </ThemedText>
+              {/* Ícones de feedback visual */}
               {showResult && isCorrect && (
                 <MaterialIcons name="check-circle" size={24} color="white" />
               )}
@@ -243,6 +305,7 @@ export default function QuizScreen() {
           );
         })}
 
+        {/* Explicação educativa */}
         {showExplanation && (
           <ThemedView style={[styles.explanationCard, { backgroundColor: '#E3F2FD' }]}>
             <MaterialIcons name="info" size={24} color="#1976D2" />
@@ -250,6 +313,7 @@ export default function QuizScreen() {
           </ThemedView>
         )}
 
+        {/* Botão para próxima pergunta */}
         {showExplanation && (
           <TouchableOpacity
             style={[styles.nextButton, { backgroundColor: '#2196F3' }]}
@@ -263,6 +327,7 @@ export default function QuizScreen() {
         )}
       </ThemedView>
 
+      {/* Dica motivacional */}
       <ThemedView style={styles.tipsCard}>
         <MaterialIcons name="lightbulb" size={24} color="#FFA500" />
         <ThemedText style={styles.tipText}>
@@ -273,6 +338,10 @@ export default function QuizScreen() {
   );
 }
 
+/**
+ * Estilos da tela de quiz
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -283,7 +352,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {
@@ -303,7 +372,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#2196F3',
+    backgroundColor: '#2196F3', // Azul para progresso
     borderRadius: 4,
   },
   progressInfo: {
@@ -318,7 +387,7 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4CAF50',
+    color: '#4CAF50', // Verde para pontuação
   },
   questionCard: {
     margin: 20,
@@ -359,7 +428,7 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     borderWidth: 2,
-    borderColor: '#2196F3',
+    borderColor: '#2196F3', // Azul para seleção
   },
   correctOption: {
     borderWidth: 0,

@@ -13,22 +13,34 @@ import {
   Vibration
 } from 'react-native';
 
+/**
+ * Interface para representar uma receita
+ * Define a estrutura dos dados de cada receita no aplicativo
+ */
 interface Recipe {
-  id: string;
-  title: string;
-  time: string;
-  difficulty: string;
-  category: string;
-  image: string;
+  id: string;           // Identificador único da receita
+  title: string;        // Nome da receita
+  time: string;         // Tempo de preparo
+  difficulty: string;   // Nível de dificuldade
+  category: string;     // Categoria da receita
+  image: string;        // Emoji representativo da receita
 }
 
+/**
+ * Categorias de receitas disponíveis
+ * A categoria "especiais" contém a funcionalidade secreta de acesso
+ */
 const categories = [
   { id: 'rapidas', name: 'Pratos Rápidos', icon: '⚡' },
   { id: 'sobremesas', name: 'Sobremesas', icon: '🍰' },
   { id: 'saudaveis', name: 'Saudáveis', icon: '🥗' },
-  { id: 'especiais', name: 'Especiais', icon: '⭐' },
+  { id: 'especiais', name: 'Especiais', icon: '⭐' }, // Categoria com acesso secreto
 ];
 
+/**
+ * Lista de receitas pré-definidas
+ * Cada receita tem informações completas para o disfarce do aplicativo
+ */
 const recipes: Recipe[] = [
   { id: '1', title: 'Risoto de Limão', time: '30 min', difficulty: 'Fácil', category: 'rapidas', image: '🍚' },
   { id: '2', title: 'Brigadeiro Gourmet', time: '20 min', difficulty: 'Fácil', category: 'sobremesas', image: '🍫' },
@@ -52,6 +64,25 @@ const recipes: Recipe[] = [
   { id: '20', title: 'Brownie de Chocolate', time: '35 min', difficulty: 'Médio', category: 'sobremesas', image: '🍫' },
 ];
 
+/**
+ * Tela principal de receitas - Funcionalidade disfarçada do aplicativo
+ * 
+ * Esta tela serve como a interface principal visível do aplicativo,
+ * apresentando-se como um app de receitas culinárias. No entanto,
+ * ela contém uma funcionalidade secreta: manter pressionado a categoria
+ * "Especiais" por 5 segundos ativa o acesso às funcionalidades de segurança.
+ * 
+ * Funcionalidades:
+ * - Exibição de receitas por categoria
+ * - Navegação entre categorias
+ * - Acesso secreto via pressão prolongada
+ * - Interface responsiva e temática
+ * 
+ * Acesso Secreto:
+ * - Pressionar e segurar a categoria "Especiais" por 5 segundos
+ * - Vibração confirma a ativação
+ * - Redireciona para a tela de avaliação de risco
+ */
 export default function RecipesScreen() {
   const colorScheme = useColorScheme();
   const [selectedCategory, setSelectedCategory] = useState('rapidas');
@@ -60,25 +91,37 @@ export default function RecipesScreen() {
   const startTime = useRef<number>(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
 
+  /**
+   * Manipula o início do toque em uma categoria
+   * Se for a categoria "especiais", inicia o timer para acesso secreto
+   * 
+   * @param categoryId - ID da categoria tocada
+   */
   const handlePressIn = (categoryId: string) => {
     if (categoryId === 'especiais') {
       startTime.current = Date.now();
       setIsHolding(true);
       
+      // Animação de progresso visual
       Animated.timing(progressAnim, {
         toValue: 100,
-        duration: 5000,
+        duration: 5000, // 5 segundos
         useNativeDriver: false,
       }).start();
       
+      // Timer para ativar o acesso secreto após 5 segundos
       holdTimer.current = setTimeout(() => {
         console.log('5 segundos completos! Ativando acesso secreto...');
-        Vibration.vibrate(100);
+        Vibration.vibrate(100); // Feedback háptico
         handleSecretAccess();
       }, 5000);
     }
   };
 
+  /**
+   * Manipula o fim do toque
+   * Cancela o timer se o usuário soltar antes dos 5 segundos
+   */
   const handlePressOut = () => {
     if (holdTimer.current) {
       clearTimeout(holdTimer.current);
@@ -88,6 +131,10 @@ export default function RecipesScreen() {
     setIsHolding(false);
   };
 
+  /**
+   * Ativa o acesso secreto às funcionalidades de segurança
+   * Salva o estado no AsyncStorage e navega para a avaliação
+   */
   const handleSecretAccess = async () => {
     try {
       // Salvar estado de acesso seguro
@@ -108,6 +155,12 @@ export default function RecipesScreen() {
     }
   };
 
+  /**
+   * Manipula a seleção de categoria
+   * Impede mudança durante o acesso secreto
+   * 
+   * @param categoryId - ID da categoria selecionada
+   */
   const handleCategoryPress = (categoryId: string) => {
     // Se estiver segurando, não muda a categoria
     if (isHolding && categoryId === 'especiais') {
@@ -116,15 +169,18 @@ export default function RecipesScreen() {
     setSelectedCategory(categoryId);
   };
 
+  // Filtra receitas pela categoria selecionada
   const filteredRecipes = recipes.filter(recipe => recipe.category === selectedCategory);
 
   return (
     <ThemedView style={styles.container}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <ThemedText type="title">Toque de Casa 👩‍🍳</ThemedText>
         <ThemedText style={styles.subtitle}>Receitas práticas para o dia a dia</ThemedText>
       </ThemedView>
 
+      {/* Container de categorias com scroll horizontal */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
@@ -145,6 +201,7 @@ export default function RecipesScreen() {
           >
             <ThemedText style={styles.categoryIcon}>{category.icon}</ThemedText>
             <ThemedText style={styles.categoryName}>{category.name}</ThemedText>
+            {/* Barra de progresso para acesso secreto */}
             {category.id === 'especiais' && isHolding && (
               <ThemedView style={styles.progressBar}>
                 <ThemedView style={[styles.progressFill, { width: '100%' }]} />
@@ -154,6 +211,7 @@ export default function RecipesScreen() {
         ))}
       </ScrollView>
 
+      {/* Lista de receitas filtradas */}
       <ScrollView style={styles.recipesContainer}>
         {filteredRecipes.map((recipe) => (
           <TouchableOpacity 
@@ -175,6 +233,10 @@ export default function RecipesScreen() {
   );
 }
 
+/**
+ * Estilos da tela de receitas
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -201,10 +263,10 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   selectedCategory: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#FF6B6B', // Cor coral do app
   },
   holdingCategory: {
-    opacity: 0.8,
+    opacity: 0.8, // Feedback visual durante pressão
   },
   categoryIcon: {
     fontSize: 32,
@@ -226,7 +288,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAF50', // Verde para indicar progresso
   },
   recipesContainer: {
     flex: 1,

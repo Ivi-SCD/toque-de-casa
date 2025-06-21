@@ -17,17 +17,52 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para as configurações do aplicativo
+ * Define todas as opções de segurança e privacidade
+ */
 interface Settings {
-  biometricEnabled: boolean;
-  autoLockTime: number;
-  panicModeEnabled: boolean;
-  hideNotifications: boolean;
-  fakeAppMode: boolean;
-  emergencyWipe: boolean;
-  locationTracking: boolean;
-  cloudBackup: boolean;
+  biometricEnabled: boolean;    // Autenticação biométrica
+  autoLockTime: number;         // Tempo de auto-bloqueio (minutos)
+  panicModeEnabled: boolean;    // Modo pânico ativo
+  hideNotifications: boolean;   // Ocultar notificações sensíveis
+  fakeAppMode: boolean;         // Modo disfarçado ativo
+  emergencyWipe: boolean;       // Limpeza de emergência
+  locationTracking: boolean;    // Rastreamento de localização
+  cloudBackup: boolean;         // Backup na nuvem
 }
 
+/**
+ * Tela de Configurações - Controle de Segurança e Privacidade
+ * 
+ * Esta tela permite configurar todas as funcionalidades de segurança
+ * do aplicativo, incluindo autenticação biométrica, modo pânico,
+ * configurações de privacidade e gerenciamento de dados.
+ * 
+ * Funcionalidades de Segurança:
+ * - Autenticação biométrica (impressão digital/Face ID)
+ * - Auto-bloqueio configurável
+ * - Modo pânico com código personalizado
+ * - Limpeza de emergência de dados
+ * - Teste do modo pânico
+ * 
+ * Configurações de Privacidade:
+ * - Ocultação de notificações sensíveis
+ * - Modo disfarçado de app de receitas
+ * - Controle de rastreamento de localização
+ * - Backup criptografado na nuvem
+ * 
+ * Gerenciamento de Dados:
+ * - Exportação segura de dados
+ * - Limpeza completa de dados
+ * - Backup e restauração
+ * 
+ * Recursos Especiais:
+ * - Código de pânico personalizado
+ * - Simulação de modo de emergência
+ * - Configurações persistentes
+ * - Integração com serviços de segurança
+ */
 export default function SettingsScreen() {
   const colorScheme = useColorScheme();
   const [settings, setSettings] = useState<Settings>({
@@ -44,11 +79,17 @@ export default function SettingsScreen() {
   const [panicCode, setPanicCode] = useState('');
   const [confirmCode, setConfirmCode] = useState('');
 
+  /**
+   * Carrega configurações salvas e inicializa serviços de segurança
+   */
   useEffect(() => {
     loadSettings();
     SecurityService.initialize();
   }, []);
 
+  /**
+   * Carrega configurações do AsyncStorage
+   */
   const loadSettings = async () => {
     try {
       const saved = await AsyncStorage.getItem('appSettings');
@@ -60,6 +101,11 @@ export default function SettingsScreen() {
     }
   };
 
+  /**
+   * Salva configurações no AsyncStorage
+   * 
+   * @param newSettings - Novas configurações a serem salvas
+   */
   const saveSettings = async (newSettings: Settings) => {
     try {
       await AsyncStorage.setItem('appSettings', JSON.stringify(newSettings));
@@ -69,8 +115,15 @@ export default function SettingsScreen() {
     }
   };
 
+  /**
+   * Ativa/desativa autenticação biométrica
+   * Verifica disponibilidade do hardware antes de ativar
+   * 
+   * @param value - True para ativar, false para desativar
+   */
   const toggleBiometric = async (value: boolean) => {
     if (value) {
+      // Verifica se o dispositivo suporta biometria
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
@@ -82,6 +135,7 @@ export default function SettingsScreen() {
         return;
       }
 
+      // Ativa autenticação biométrica via serviço de segurança
       const result = await SecurityService.enableBiometric();
       if (result) {
         saveSettings({ ...settings, biometricEnabled: true });
@@ -91,6 +145,10 @@ export default function SettingsScreen() {
     }
   };
 
+  /**
+   * Atualiza código de pânico
+   * Valida entrada e salva via serviço de segurança
+   */
   const updatePanicCode = async () => {
     if (panicCode.length < 6) {
       Alert.alert('Erro', 'O código deve ter pelo menos 6 dígitos');
@@ -109,6 +167,10 @@ export default function SettingsScreen() {
     Alert.alert('Sucesso', 'Código de pânico atualizado');
   };
 
+  /**
+   * Testa o modo pânico
+   * Simula ativação de emergência para verificar funcionamento
+   */
   const testPanicMode = () => {
     Alert.alert(
       'Testar Modo Pânico',
@@ -127,6 +189,10 @@ export default function SettingsScreen() {
     );
   };
 
+  /**
+   * Limpa todos os dados do aplicativo
+   * Ação irreversível com confirmação obrigatória
+   */
   const clearAllData = () => {
     Alert.alert(
       'Limpar Todos os Dados',
@@ -145,11 +211,16 @@ export default function SettingsScreen() {
     );
   };
 
+  /**
+   * Exporta dados do aplicativo
+   * Cria backup seguro de todas as informações
+   */
   const exportData = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const data: any = {};
       
+      // Coleta todos os dados salvos
       for (const key of keys) {
         const value = await AsyncStorage.getItem(key);
         if (value) data[key] = JSON.parse(value);
@@ -166,6 +237,7 @@ export default function SettingsScreen() {
     }
   };
 
+  // Tipos para itens de configuração
   type SwitchSettingItem = {
     icon: string;
     label: string;
@@ -206,6 +278,10 @@ export default function SettingsScreen() {
     items: SettingItem[];
   };
   
+  /**
+   * Seções de configurações organizadas por categoria
+   * Cada seção agrupa configurações relacionadas
+   */
   const settingsSections: SettingsSection[] = [
     {
       title: 'Segurança',
@@ -341,6 +417,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -351,10 +428,12 @@ export default function SettingsScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Seções de configurações */}
       {settingsSections.map((section, sectionIndex) => (
         <ThemedView key={sectionIndex} style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{section.title}</ThemedText>
           
+          {/* Itens de configuração */}
           {section.items.map((item, itemIndex) => (
             <TouchableOpacity
               key={itemIndex}
@@ -379,6 +458,7 @@ export default function SettingsScreen() {
                   {item.description}
                 </ThemedText>
               </ThemedView>
+              {/* Switch para configurações booleanas */}
               {item.type === 'switch' && (
                 <Switch
                   value={item.value}
@@ -387,6 +467,7 @@ export default function SettingsScreen() {
                   thumbColor={item.value ? '#FFFFFF' : '#f4f3f4'}
                 />
               )}
+              {/* Seta para itens de ação */}
               {item.type === 'button' && (
                 <MaterialIcons name="chevron-right" size={24} color="#999" />
               )}
@@ -395,6 +476,7 @@ export default function SettingsScreen() {
         </ThemedView>
       ))}
 
+      {/* Modal para configurar código de pânico */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -408,6 +490,7 @@ export default function SettingsScreen() {
               Digite um código que ativará o modo de emergência quando inserido
             </ThemedText>
             
+            {/* Campo para novo código */}
             <TextInput
               style={[styles.codeInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
               placeholder="Novo código (mínimo 6 dígitos)"
@@ -419,6 +502,7 @@ export default function SettingsScreen() {
               onChangeText={setPanicCode}
             />
             
+            {/* Campo para confirmar código */}
             <TextInput
               style={[styles.codeInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
               placeholder="Confirmar código"
@@ -430,6 +514,7 @@ export default function SettingsScreen() {
               onChangeText={setConfirmCode}
             />
 
+            {/* Botões do modal */}
             <ThemedView style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: '#666' }]}
@@ -455,6 +540,10 @@ export default function SettingsScreen() {
   );
 }
 
+/**
+ * Estilos da tela de configurações
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -465,7 +554,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {

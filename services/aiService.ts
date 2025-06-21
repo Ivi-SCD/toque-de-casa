@@ -3,73 +3,104 @@ import * as Calendar from 'expo-calendar';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+/**
+ * Interface para representar um alibi (cobertura)
+ * Um alibi é um evento disfarçado que pode ser usado como cobertura
+ */
 interface Alibi {
-  id: string;
-  title: string;
-  culinaryTitle: string;
-  startTime: Date;
-  endTime: Date;
-  location: string;
-  culinaryLocation: string;
-  description: string;
-  recurring: boolean;
-  reminderMinutesBefore: number;
-  calendarEventId?: string;
+  id: string;                    // Identificador único do alibi
+  title: string;                 // Título real do evento
+  culinaryTitle: string;         // Título disfarçado (culinário)
+  startTime: Date;               // Horário de início
+  endTime: Date;                 // Horário de término
+  location: string;              // Localização real
+  culinaryLocation: string;      // Localização disfarçada
+  description: string;           // Descrição do evento
+  recurring: boolean;            // Se é um evento recorrente
+  reminderMinutesBefore: number; // Minutos antes para lembrete
+  calendarEventId?: string;      // ID do evento no calendário
 }
 
+/**
+ * Template de alibi pré-definido
+ * Define tipos de eventos que podem ser criados como alibis
+ */
 interface AlibiTemplate {
-  id: string;
-  name: string;
-  culinaryName: string;
-  duration: number; // minutes
-  suggestedLocations: string[];
+  id: string;                    // Identificador do template
+  name: string;                  // Nome real do tipo de evento
+  culinaryName: string;          // Nome disfarçado (culinário)
+  duration: number;              // Duração em minutos
+  suggestedLocations: string[];  // Locais sugeridos para o evento
 }
 
+/**
+ * Serviço de IA e Alibis para o aplicativo Toque de Casa
+ * 
+ * Este serviço gerencia a criação e gerenciamento de alibis (coberturas)
+ * que permitem ao usuário ter eventos disfarçados no calendário e
+ * notificações para situações de emergência.
+ * 
+ * Funcionalidades:
+ * - Criação de eventos disfarçados no calendário
+ * - Templates pré-definidos de alibis
+ * - Notificações de lembrete
+ * - Geração de desculpas rápidas
+ * - Compartilhamento de "provas" de alibi
+ * 
+ * Implementa o padrão Singleton
+ */
 class AlibiService {
   private static instance: AlibiService;
   private alibis: Alibi[] = [];
   private calendarId: string | null = null;
 
+  /**
+   * Templates pré-definidos de alibis
+   * Cada template tem um evento real e sua versão disfarçada
+   */
   private alibiTemplates: AlibiTemplate[] = [
     {
       id: '1',
       name: 'Consulta médica',
       culinaryName: 'Aula de culinária',
-      duration: 120,
+      duration: 120, // 2 horas
       suggestedLocations: ['Hospital Regional', 'UBS Central', 'Clínica Popular'],
     },
     {
       id: '2',
       name: 'Reunião com advogada',
       culinaryName: 'Degustação de vinhos',
-      duration: 90,
+      duration: 90, // 1h30
       suggestedLocations: ['Defensoria Pública', 'Escritório Centro', 'Fórum'],
     },
     {
       id: '3',
       name: 'Terapia/Psicóloga',
       culinaryName: 'Workshop de confeitaria',
-      duration: 60,
+      duration: 60, // 1 hora
       suggestedLocations: ['CAPS', 'Consultório particular', 'Centro de Saúde'],
     },
     {
       id: '4',
       name: 'Grupo de apoio',
       culinaryName: 'Clube de cozinheiras',
-      duration: 120,
+      duration: 120, // 2 horas
       suggestedLocations: ['CREAS', 'Igreja local', 'Centro comunitário'],
     },
     {
       id: '5',
       name: 'Curso profissionalizante',
       culinaryName: 'Feira gastronômica',
-      duration: 180,
+      duration: 180, // 3 horas
       suggestedLocations: ['SENAC', 'SENAI', 'Instituto Federal'],
     },
   ];
 
   private constructor() {}
 
+  /**
+   * Obtém a instância única do serviço (Singleton)
+   */
   static getInstance(): AlibiService {
     if (!AlibiService.instance) {
       AlibiService.instance = new AlibiService();
@@ -77,12 +108,18 @@ class AlibiService {
     return AlibiService.instance;
   }
 
+  /**
+   * Inicializa o serviço carregando dados e configurando permissões
+   */
   async initialize() {
     await this.loadAlibis();
     await this.setupCalendar();
     await this.setupNotifications();
   }
 
+  /**
+   * Carrega alibis salvos do AsyncStorage
+   */
   private async loadAlibis() {
     try {
       const saved = await AsyncStorage.getItem('alibis');
@@ -94,6 +131,9 @@ class AlibiService {
     }
   }
 
+  /**
+   * Salva alibis no AsyncStorage
+   */
   private async saveAlibis() {
     try {
       await AsyncStorage.setItem('alibis', JSON.stringify(this.alibis));
@@ -102,25 +142,31 @@ class AlibiService {
     }
   }
 
+  /**
+   * Configura o calendário para criar eventos disfarçados
+   * Cria um calendário específico "Toque de Casa Receitas" se não existir
+   */
   private async setupCalendar() {
     try {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status === 'granted') {
         const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
         
-        // Find or create Toque de Casa calendar
+        // Procura pelo calendário do Toque de Casa
         let toqueDeCasaCalendar = calendars.find(cal => cal.title === 'Toque de Casa Receitas');
         
         if (!toqueDeCasaCalendar) {
+          // Determina a fonte padrão do calendário baseado na plataforma
           const defaultCalendarSource = 
             Platform.OS === 'ios'
               ? calendars.find(cal => cal.source.name === 'iCloud')?.source
               : undefined;
 
           if (defaultCalendarSource || Platform.OS === 'android') {
+            // Cria o calendário personalizado
             this.calendarId = await Calendar.createCalendarAsync({
               title: 'Toque de Casa Receitas',
-              color: '#FF6B6B',
+              color: '#FF6B6B', // Cor coral do app
               entityType: Calendar.EntityTypes.EVENT,
               sourceId: defaultCalendarSource?.id,
               source: defaultCalendarSource,
@@ -138,6 +184,9 @@ class AlibiService {
     }
   }
 
+  /**
+   * Configura as notificações para lembretes de alibis
+   */
   private async setupNotifications() {
     const { status } = await Notifications.requestPermissionsAsync();
     if (status === 'granted') {
@@ -153,6 +202,15 @@ class AlibiService {
     }
   }
 
+  /**
+   * Cria um novo alibi baseado em um template
+   * 
+   * @param templateId - ID do template a ser usado
+   * @param startTime - Horário de início do evento
+   * @param location - Localização do evento
+   * @param customDescription - Descrição personalizada (opcional)
+   * @returns Alibi criado ou null se falhar
+   */
   async createAlibi(
     templateId: string,
     startTime: Date,
@@ -162,6 +220,7 @@ class AlibiService {
     const template = this.alibiTemplates.find(t => t.id === templateId);
     if (!template) return null;
 
+    // Calcula o horário de término baseado na duração do template
     const endTime = new Date(startTime.getTime() + template.duration * 60000);
     
     const alibi: Alibi = {
@@ -177,14 +236,14 @@ class AlibiService {
       reminderMinutesBefore: 30,
     };
 
-    // Create calendar event
+    // Cria evento no calendário se possível
     if (this.calendarId) {
       try {
         const eventId = await Calendar.createEventAsync(this.calendarId, {
-          title: alibi.culinaryTitle,
+          title: alibi.culinaryTitle, // Usa o título disfarçado
           startDate: startTime,
           endDate: endTime,
-          location: alibi.culinaryLocation,
+          location: alibi.culinaryLocation, // Usa a localização disfarçada
           notes: alibi.description,
           alarms: [{ relativeOffset: -alibi.reminderMinutesBefore }],
         });
@@ -195,9 +254,10 @@ class AlibiService {
       }
     }
 
-    // Schedule notification
+    // Agenda notificação de lembrete
     await this.scheduleNotification(alibi);
 
+    // Salva o alibi localmente
     this.alibis.push(alibi);
     await this.saveAlibis();
 

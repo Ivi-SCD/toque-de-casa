@@ -12,17 +12,25 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar uma pergunta da avaliação
+ * Cada pergunta tem uma versão disfarçada e uma versão original
+ */
 interface Question {
-  id: string;
-  question: string;
-  originalQuestion: string;
+  id: string;           // Identificador único
+  question: string;     // Pergunta disfarçada (ex: "Você tem todos os utensílios?")
+  originalQuestion: string; // Pergunta original (ex: "Seu parceiro já ameaçou machucá-la?")
   options: {
-    value: string;
-    label: string;
-    score: number;
+    value: string;      // Valor da resposta
+    label: string;      // Texto da opção
+    score: number;      // Pontuação da opção (0-15)
   }[];
 }
 
+/**
+ * Perguntas da avaliação de risco disfarçadas como checklist culinário
+ * Cada pergunta avalia um aspecto diferente da segurança da usuária
+ */
 const questions: Question[] = [
   {
     id: '1',
@@ -81,29 +89,78 @@ const questions: Question[] = [
   },
 ];
 
+/**
+ * Tela de Avaliação - Checklist de Risco Disfarçado
+ * 
+ * Esta tela apresenta um "checklist de cozinha" que na verdade é uma
+ * avaliação de risco para violência doméstica, disfarçada em perguntas
+ * sobre culinária e organização da cozinha.
+ * 
+ * Funcionalidades:
+ * - Perguntas progressivas com metáforas culinárias
+ * - Sistema de pontuação baseado em respostas
+ * - Cálculo automático do nível de risco
+ * - Armazenamento seguro dos resultados
+ * - Redirecionamento para resultados personalizados
+ * 
+ * Perguntas e Significados:
+ * - "Utensílios na cozinha" = Histórico de ameaças físicas
+ * - "Escolha de ingredientes" = Controle de atividades
+ * - "Estado da despensa" = Medo do parceiro
+ * - "Tranquilidade ao cozinhar" = Segurança em casa
+ * - "Sucesso das receitas" = Violência psicológica
+ * 
+ * Níveis de Risco:
+ * - Baixo (0-20 pontos): Situação segura
+ * - Moderado (21-40 pontos): Atenção necessária
+ * - Alto (41+ pontos): Intervenção urgente
+ * 
+ * Objetivos:
+ * - Identificar situações de risco de forma discreta
+ * - Fornecer orientações personalizadas
+ * - Conectar usuárias com recursos apropriados
+ * - Manter privacidade e segurança
+ */
 export default function AssessmentScreen() {
   const colorScheme = useColorScheme();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [totalScore, setTotalScore] = useState(0);
 
+  /**
+   * Processa a resposta selecionada pelo usuário
+   * Avança para próxima pergunta ou calcula resultado final
+   * 
+   * @param questionId - ID da pergunta respondida
+   * @param value - Valor da resposta selecionada
+   * @param score - Pontuação da resposta
+   */
   const handleAnswer = (questionId: string, value: string, score: number) => {
     setAnswers({ ...answers, [questionId]: value });
     
     if (currentQuestion < questions.length - 1) {
+      // Avança para próxima pergunta
       setCurrentQuestion(currentQuestion + 1);
       setTotalScore(totalScore + score);
     } else {
+      // Última pergunta - calcula resultado final
       const finalScore = totalScore + score;
       calculateRisk(finalScore);
     }
   };
 
+  /**
+   * Calcula o nível de risco baseado na pontuação total
+   * Salva resultados e apresenta orientações personalizadas
+   * 
+   * @param score - Pontuação total da avaliação
+   */
   const calculateRisk = async (score: number) => {
     let riskLevel = '';
     let message = '';
     let tips = [];
 
+    // Define nível de risco e mensagens baseado na pontuação
     if (score <= 20) {
       riskLevel = 'baixo';
       message = 'Você é uma cozinheira experiente! Continue assim.';
@@ -132,9 +189,11 @@ export default function AssessmentScreen() {
       ];
     }
 
+    // Salva resultados no AsyncStorage
     await AsyncStorage.setItem('riskLevel', riskLevel);
     await AsyncStorage.setItem('assessmentScore', score.toString());
 
+    // Apresenta resultado e opções
     Alert.alert(
       'Resultado do Checklist',
       message,
@@ -155,6 +214,7 @@ export default function AssessmentScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -165,6 +225,7 @@ export default function AssessmentScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Barra de progresso */}
       <ThemedView style={styles.progressContainer}>
         <ThemedView style={styles.progressBar}>
           <ThemedView style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -174,10 +235,12 @@ export default function AssessmentScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Conteúdo da pergunta atual */}
       <ScrollView style={styles.content}>
         <ThemedView style={[styles.questionCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
           <ThemedText style={styles.questionText}>{question.question}</ThemedText>
           
+          {/* Opções de resposta */}
           {question.options.map((option) => (
             <TouchableOpacity
               key={option.value}
@@ -193,6 +256,10 @@ export default function AssessmentScreen() {
   );
 }
 
+/**
+ * Estilos da tela de avaliação
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -203,7 +270,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {
@@ -223,7 +290,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#FF6B6B', // Cor coral do app
     borderRadius: 4,
   },
   progressText: {

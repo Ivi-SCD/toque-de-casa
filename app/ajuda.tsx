@@ -12,19 +12,31 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar um tópico de ajuda
+ * Define a estrutura dos tópicos de suporte
+ */
 interface HelpTopic {
-  id: string;
-  title: string;
-  icon: string;
-  content: string[];
-  tips?: string[];
+  id: string;           // Identificador único
+  title: string;        // Título do tópico
+  icon: string;         // Ícone do MaterialIcons
+  content: string[];    // Conteúdo explicativo
+  tips?: string[];      // Dicas opcionais
 }
 
+/**
+ * Interface para representar uma pergunta frequente
+ * Define a estrutura das FAQs
+ */
 interface FAQ {
-  question: string;
-  answer: string;
+  question: string;     // Pergunta
+  answer: string;       // Resposta
 }
 
+/**
+ * Tópicos de ajuda organizados por categoria
+ * Fornece informações sobre uso do app e segurança
+ */
 const helpTopics: HelpTopic[] = [
   {
     id: '1',
@@ -94,6 +106,10 @@ const helpTopics: HelpTopic[] = [
   },
 ];
 
+/**
+ * Perguntas frequentes sobre segurança e uso do app
+ * Responde dúvidas comuns sobre privacidade e funcionalidades
+ */
 const faqs: FAQ[] = [
   {
     question: 'O app é realmente seguro?',
@@ -117,6 +133,10 @@ const faqs: FAQ[] = [
   },
 ];
 
+/**
+ * Números de emergência disfarçados
+ * Alguns são números reais, outros são fictícios para segurança
+ */
 const emergencyNumbers = [
   { name: 'Central de Atendimento à Mulher', number: '180', real: true },
   { name: 'Mercado 24h (Emergência)', number: '190', real: true },
@@ -124,16 +144,53 @@ const emergencyNumbers = [
   { name: 'Consultoria Jurídica', number: '(61) 3207-6172', real: false },
 ];
 
+/**
+ * Tela de Ajuda - Central de Suporte e Informações
+ * 
+ * Esta tela fornece informações completas sobre como usar o aplicativo
+ * de forma segura, incluindo códigos de emergência, números importantes
+ * e orientações sobre segurança digital.
+ * 
+ * Funcionalidades:
+ * - Números de emergência com acesso direto
+ * - Tópicos de ajuda organizados por categoria
+ * - Perguntas frequentes sobre segurança
+ * - Tutorial interativo
+ * - Contato com suporte
+ * - Modal detalhado para cada tópico
+ * 
+ * Recursos de Segurança:
+ * - Números reais de emergência
+ * - Códigos de comunicação discreta
+ * - Orientações sobre privacidade
+ * - Dicas de segurança digital
+ * 
+ * Objetivos:
+ * - Orientar usuárias sobre uso seguro
+ * - Fornecer informações de emergência
+ * - Esclarecer dúvidas sobre funcionalidades
+ * - Promover uso responsável do app
+ */
 export default function HelpScreen() {
   const colorScheme = useColorScheme();
   const [selectedTopic, setSelectedTopic] = useState<HelpTopic | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showEmergencyNumbers, setShowEmergencyNumbers] = useState(false);
 
+  /**
+   * Abre o discador com o número selecionado
+   * 
+   * @param number - Número de telefone para discar
+   */
   const handleCall = (number: string) => {
     Linking.openURL(`tel:${number}`);
   };
 
+  /**
+   * Abre o modal com detalhes do tópico selecionado
+   * 
+   * @param topic - Tópico de ajuda selecionado
+   */
   const handleTopicPress = (topic: HelpTopic) => {
     setSelectedTopic(topic);
     setModalVisible(true);
@@ -141,6 +198,7 @@ export default function HelpScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -151,7 +209,7 @@ export default function HelpScreen() {
         </ThemedText>
       </ThemedView>
 
-      {/* Quick Emergency Button */}
+      {/* Botão de números de emergência */}
       <TouchableOpacity
         style={[styles.emergencyButton, { backgroundColor: '#FF0000' }]}
         onPress={() => setShowEmergencyNumbers(!showEmergencyNumbers)}
@@ -167,6 +225,7 @@ export default function HelpScreen() {
         />
       </TouchableOpacity>
 
+      {/* Lista de números de emergência */}
       {showEmergencyNumbers && (
         <ThemedView style={[styles.emergencyNumbers, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
           {emergencyNumbers.map((item, index) => (
@@ -185,7 +244,7 @@ export default function HelpScreen() {
         </ThemedView>
       )}
 
-      {/* Help Topics */}
+      {/* Seção de tópicos de ajuda */}
       <ThemedText style={styles.sectionTitle}>Tópicos de Ajuda</ThemedText>
       {helpTopics.map((topic) => (
         <TouchableOpacity
@@ -199,7 +258,7 @@ export default function HelpScreen() {
         </TouchableOpacity>
       ))}
 
-      {/* FAQs */}
+      {/* Seção de perguntas frequentes */}
       <ThemedText style={styles.sectionTitle}>Perguntas Frequentes</ThemedText>
       {faqs.map((faq, index) => (
         <ThemedView
@@ -214,11 +273,11 @@ export default function HelpScreen() {
         </ThemedView>
       ))}
 
-      {/* Tutorial Video */}
+      {/* Card do tutorial interativo */}
       <TouchableOpacity
         style={[styles.tutorialCard, { backgroundColor: '#4CAF50' }]}
         onPress={() => {
-          // Open tutorial video or interactive guide
+          // Abre tutorial ou guia interativo
           router.push('/plano-seguranca');
         }}
       >
@@ -231,7 +290,7 @@ export default function HelpScreen() {
         </ThemedView>
       </TouchableOpacity>
 
-      {/* Support Contact */}
+      {/* Card de contato com suporte */}
       <ThemedView style={[styles.supportCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
         <MaterialIcons name="support-agent" size={32} color="#666" />
         <ThemedView style={styles.supportContent}>
@@ -242,7 +301,7 @@ export default function HelpScreen() {
         </ThemedView>
       </ThemedView>
 
-      {/* Topic Detail Modal */}
+      {/* Modal com detalhes do tópico */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -268,12 +327,14 @@ export default function HelpScreen() {
                 />
                 <ThemedText style={styles.modalTitle}>{selectedTopic.title}</ThemedText>
 
+                {/* Conteúdo do tópico */}
                 {selectedTopic.content.map((paragraph, index) => (
                   <ThemedText key={index} style={styles.modalParagraph}>
                     {paragraph}
                   </ThemedText>
                 ))}
 
+                {/* Dicas do tópico */}
                 {selectedTopic.tips && selectedTopic.tips.length > 0 && (
                   <ThemedView style={styles.tipsSection}>
                     <ThemedText style={styles.tipsSectionTitle}>Dicas Importantes:</ThemedText>
@@ -294,6 +355,10 @@ export default function HelpScreen() {
   );
 }
 
+/**
+ * Estilos da tela de ajuda
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -304,7 +369,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {
@@ -463,7 +528,7 @@ const styles = StyleSheet.create({
   },
   modalIcon: {
     alignSelf: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 24,
@@ -477,16 +542,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   tipsSection: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: '#F5F5F5',
     padding: 15,
     borderRadius: 8,
     marginTop: 20,
   },
   tipsSectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
-    color: '#E65100',
   },
   tipItem: {
     flexDirection: 'row',
@@ -497,6 +561,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 14,
-    color: '#E65100',
+    lineHeight: 20,
   },
 });

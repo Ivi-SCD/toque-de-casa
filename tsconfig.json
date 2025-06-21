@@ -1,25 +1,29 @@
 {
+  // Configurações do compilador TypeScript
   "compilerOptions": {
-    "strict": true,
-    "jsx": "react-jsx",
-    "moduleResolution": "bundler",
-    "target": "esnext",
-    "module": "esnext",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "strict": true,                    // Habilita todas as verificações estritas de tipo
+    "jsx": "react-jsx",               // Usa a nova transformação JSX do React 17+
+    "moduleResolution": "bundler",    // Resolução de módulos otimizada para bundlers
+    "target": "esnext",               // Compila para a versão mais recente do ECMAScript
+    "module": "esnext",               // Usa módulos ES6+
+    "allowJs": true,                  // Permite arquivos JavaScript junto com TypeScript
+    "esModuleInterop": true,          // Habilita interoperabilidade com módulos CommonJS
+    "skipLibCheck": true,             // Pula verificação de tipos em arquivos de declaração
+    "forceConsistentCasingInFileNames": true, // Força consistência no case dos nomes de arquivos
     "paths": {
+      // Mapeamento de alias para importações - permite usar @/ para referenciar a raiz do projeto
       "@/*": [
         "./*"
       ]
     }
   },
+  // Arquivos e pastas incluídos na compilação
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.ts",                        // Todos os arquivos TypeScript
+    "**/*.tsx",                       // Todos os arquivos TypeScript com JSX
+    ".expo/types/**/*.ts",            // Tipos do Expo
+    "expo-env.d.ts"                   // Declarações de ambiente do Expo
   ],
+  // Estende a configuração base do Expo
   "extends": "expo/tsconfig.base"
 }

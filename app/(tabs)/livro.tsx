@@ -11,16 +11,24 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar um capítulo do livro
+ * Cada capítulo tem um título disfarçado e um título real
+ */
 interface Chapter {
-  id: string;
-  title: string;
-  realTitle: string;
-  icon: string;
-  description: string;
-  content: string[];
-  tips: string[];
+  id: string;           // Identificador único
+  title: string;        // Título disfarçado (ex: "Conhecendo sua Cozinha")
+  realTitle: string;    // Título real (ex: "Reconhecendo Sinais de Violência")
+  icon: string;         // Emoji representativo
+  description: string;  // Descrição disfarçada
+  content: string[];    // Conteúdo educativo disfarçado
+  tips: string[];       // Dicas práticas e informações reais
 }
 
+/**
+ * Capítulos do livro educativo disfarçado
+ * Cada capítulo ensina sobre violência doméstica usando metáforas culinárias
+ */
 const chapters: Chapter[] = [
   {
     id: '1',
@@ -49,7 +57,7 @@ const chapters: Chapter[] = [
     description: 'Os elementos essenciais para qualquer receita',
     content: [
       'Assim como toda receita tem ingredientes básicos, você tem direitos fundamentais.',
-      'Direito de ir e vir - como escolher onde comprar seus ingredientes.',
+      'Direito de ir e vir - como escolhar onde comprar seus ingredientes.',
       'Direito à dignidade - ninguém deve estragar suas receitas ou criticar sua forma de cozinhar.',
       'Direito à segurança - sua cozinha deve ser um lugar de paz.',
       'Direito à igualdade - as tarefas da cozinha devem ser divididas.',
@@ -126,22 +134,61 @@ const chapters: Chapter[] = [
   },
 ];
 
+/**
+ * Tela do Livro de Receitas - Conteúdo Educativo Disfarçado
+ * 
+ * Esta tela apresenta um "livro de receitas" que na verdade é um
+ * guia educativo sobre violência doméstica, direitos das mulheres
+ * e estratégias de segurança, tudo disfarçado em metáforas culinárias.
+ * 
+ * Funcionalidades:
+ * - Capítulos educativos com metáforas culinárias
+ * - Informações sobre direitos e leis
+ * - Dicas práticas de segurança
+ * - Histórias inspiradoras de superação
+ * - Acesso rápido ao plano de segurança
+ * - Quiz para testar conhecimento
+ * 
+ * Capítulos Disponíveis:
+ * - "Conhecendo sua Cozinha" = Reconhecendo Sinais de Violência
+ * - "Ingredientes Básicos" = Seus Direitos Fundamentais
+ * - "Planejando o Cardápio" = Criando um Plano de Segurança
+ * - "Cozinhando com Autonomia" = Independência Financeira
+ * - "Histórias de Cozinheiras" = Histórias de Superação
+ * 
+ * Objetivos Educativos:
+ * - Conscientização sobre violência doméstica
+ * - Conhecimento sobre direitos legais
+ * - Desenvolvimento de estratégias de segurança
+ * - Fortalecimento da autonomia feminina
+ * - Inspiração através de histórias reais
+ */
 export default function BookScreen() {
   const colorScheme = useColorScheme();
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  /**
+   * Abre o modal com o conteúdo do capítulo selecionado
+   * 
+   * @param chapter - Capítulo selecionado
+   */
   const handleChapterPress = (chapter: Chapter) => {
     setSelectedChapter(chapter);
     setModalVisible(true);
   };
 
+  /**
+   * Navega para a tela de plano de segurança
+   * Acesso direto às funcionalidades de proteção
+   */
   const handleEmergencyRecipe = () => {
     router.push('/plano-seguranca');
   };
 
   return (
     <ThemedView style={styles.container}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <ThemedText type="title">Livro de Receitas</ThemedText>
         <ThemedText style={styles.subtitle}>
@@ -150,6 +197,7 @@ export default function BookScreen() {
       </ThemedView>
 
       <ScrollView style={styles.content}>
+        {/* Card de acesso rápido ao plano de segurança */}
         <TouchableOpacity 
           style={[styles.emergencyCard, { backgroundColor: '#FF6B6B' }]}
           onPress={handleEmergencyRecipe}
@@ -164,6 +212,7 @@ export default function BookScreen() {
           <MaterialIcons name="arrow-forward" size={24} color="white" />
         </TouchableOpacity>
 
+        {/* Lista de capítulos educativos */}
         {chapters.map((chapter) => (
           <TouchableOpacity
             key={chapter.id}
@@ -183,6 +232,7 @@ export default function BookScreen() {
           </TouchableOpacity>
         ))}
 
+        {/* Dica motivacional */}
         <ThemedView style={[styles.tipCard, { backgroundColor: '#4CAF50' }]}>
           <MaterialIcons name="lightbulb" size={24} color="white" />
           <ThemedText style={styles.tipText}>
@@ -191,6 +241,7 @@ export default function BookScreen() {
         </ThemedView>
       </ScrollView>
 
+      {/* Modal com conteúdo detalhado do capítulo */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -208,10 +259,12 @@ export default function BookScreen() {
                   <MaterialIcons name="close" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
                 </TouchableOpacity>
 
+                {/* Cabeçalho do capítulo */}
                 <ThemedText style={styles.modalIcon}>{selectedChapter.icon}</ThemedText>
                 <ThemedText style={styles.modalTitle}>{selectedChapter.title}</ThemedText>
                 <ThemedText style={styles.modalSubtitle}>({selectedChapter.realTitle})</ThemedText>
 
+                {/* Conteúdo educativo */}
                 <ThemedView style={styles.contentSection}>
                   {selectedChapter.content.map((paragraph, index) => (
                     <ThemedText key={index} style={styles.paragraph}>
@@ -220,6 +273,7 @@ export default function BookScreen() {
                   ))}
                 </ThemedView>
 
+                {/* Dicas práticas */}
                 <ThemedView style={styles.tipsSection}>
                   <ThemedText style={styles.tipsTitle}>Dicas Importantes:</ThemedText>
                   {selectedChapter.tips.map((tip, index) => (
@@ -230,6 +284,7 @@ export default function BookScreen() {
                   ))}
                 </ThemedView>
 
+                {/* Botão para testar conhecimento */}
                 <TouchableOpacity
                   style={[styles.actionButton, { backgroundColor: '#FF6B6B' }]}
                   onPress={() => {
@@ -250,6 +305,10 @@ export default function BookScreen() {
   );
 }
 
+/**
+ * Estilos da tela do livro
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

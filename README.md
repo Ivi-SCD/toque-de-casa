@@ -8,7 +8,7 @@ O **Toque de Casa** é o primeiro aplicativo do Brasil que utiliza uma camuflage
 
 ---
 
-##  Camuflagem Perfeita
+## 🎭 Camuflagem Perfeita
 
 A genialidade do Toque de Casa está em sua dupla camada. Para o mundo exterior e, mais importante, para um possível agressor, ele é apenas mais um app de receitas. No entanto, com um gesto secreto — **manter o dedo pressionado por 5 segundos em uma área específica** — a usuária acessa um ecossistema completo de proteção e apoio.
 
@@ -87,11 +87,62 @@ Cada funcionalidade foi meticulosamente desenhada para parecer parte de um aplic
 
 ---
 
+## 🏗️ Estrutura do Projeto
+
+```
+toque-de-casa/
+├── app/                    # Telas do aplicativo (expo-router)
+│   ├── (tabs)/            # Navegação por abas
+│   ├── _layout.tsx        # Layout principal
+│   └── ...                # Outras telas
+├── components/            # Componentes reutilizáveis
+│   ├── ui/               # Componentes de interface
+│   └── ...               # Componentes temáticos
+├── constants/            # Constantes e configurações
+│   ├── Colors.ts         # Sistema de cores
+│   └── Config.ts         # Configurações globais
+├── hooks/                # Hooks personalizados
+├── services/             # Serviços de negócio
+│   ├── security.ts       # Serviço de segurança
+│   ├── notificationService.ts # Serviço de notificações
+│   └── aiService.ts      # Serviço de IA e alibis
+├── assets/               # Recursos estáticos
+└── scripts/              # Scripts utilitários
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **React Native + Expo:** Framework principal
+- **TypeScript:** Tipagem estática
+- **Expo Router:** Navegação baseada em arquivos
+- **AsyncStorage:** Armazenamento local
+- **Expo Notifications:** Sistema de notificações
+- **Expo Calendar:** Integração com calendário
+- **Expo Local Authentication:** Autenticação biométrica
+- **Expo Crypto:** Criptografia de dados
+
+---
+
 ## 🤝 Contribuição
 
 Este é um projeto desenvolvido no [Hackathon da Campus Party Brasilia 2025](https://brasil.campus-party.org/cpbr17/hackathons/desafio-mulher-mais-segura/) com uma missão crítica. Se você deseja contribuir, por favor, abra uma *issue* para discutir suas ideias ou um *pull request* com suas melhorias.
 
-#
+### Diretrizes de Contribuição
+
+1. **Segurança em Primeiro Lugar:** Qualquer mudança deve manter a segurança e privacidade dos usuários.
+2. **Testes Rigorosos:** Todas as funcionalidades devem ser testadas antes do merge.
+3. **Documentação:** Mantenha a documentação atualizada.
+4. **Código Limpo:** Siga as boas práticas de desenvolvimento.
+
+---
+
+## 📄 Licença
+
+Este projeto é desenvolvido com propósito humanitário. Por favor, respeite a natureza sensível do projeto e seu objetivo de ajudar mulheres em situação de vulnerabilidade.
+
+---
 
 *Uma pequena dedicatória no final*
 

@@ -14,19 +14,28 @@ import {
 } from 'react-native';
 import MapView, { Marker, UrlTile } from 'react-native-maps';
 
+/**
+ * Interface para representar um local de apoio
+ * Cada local tem um nome disfarçado e um nome real para segurança
+ */
 interface SupportLocation {
-  id: string;
-  name: string;
-  realName: string;
-  type: 'emergency' | 'creas' | 'deam' | 'health';
-  address: string;
-  phone: string;
-  hours: string;
-  latitude: number;
-  longitude: number;
-  description: string;
+  id: string;           // Identificador único
+  name: string;         // Nome disfarçado (ex: "Mercado 24h")
+  realName: string;     // Nome real (ex: "UPA 24h Ceilândia")
+  type: 'emergency' | 'creas' | 'deam' | 'health'; // Tipo de serviço
+  address: string;      // Endereço do local
+  phone: string;        // Telefone para contato
+  hours: string;        // Horário de funcionamento
+  latitude: number;     // Latitude para o mapa
+  longitude: number;    // Longitude para o mapa
+  description: string;  // Descrição do serviço
 }
 
+/**
+ * Locais de apoio mapeados no Distrito Federal
+ * Cada local é disfarçado como um estabelecimento comercial
+ * mas representa um serviço real de proteção e apoio
+ */
 const supportLocations: SupportLocation[] = [
   {
     id: '1',
@@ -150,13 +159,37 @@ const supportLocations: SupportLocation[] = [
   }
 ];
 
+/**
+ * Ícones e cores para cada tipo de local
+ * Usados para identificar visualmente os diferentes tipos de serviços
+ */
 const typeIcons = {
-  emergency: { icon: 'local-hospital', color: '#FF0000' },
-  creas: { icon: 'people', color: '#4CAF50' },
-  deam: { icon: 'security', color: '#2196F3' },
-  health: { icon: 'healing', color: '#9C27B0' },
+  emergency: { icon: 'local-hospital', color: '#FF0000' }, // Vermelho para emergência
+  creas: { icon: 'people', color: '#4CAF50' },             // Verde para assistência social
+  deam: { icon: 'security', color: '#2196F3' },            // Azul para segurança
+  health: { icon: 'healing', color: '#9C27B0' },           // Roxo para saúde
 };
 
+/**
+ * Tela de Mapas - Rede de Apoio Disfarçada
+ * 
+ * Esta tela apresenta um mapa interativo que mostra "locais de compra"
+ * mas na verdade exibe a rede de apoio e proteção para mulheres em situação
+ * de violência no Distrito Federal.
+ * 
+ * Funcionalidades:
+ * - Mapa interativo com localização atual
+ * - Filtros por tipo de serviço (disfarçados como categorias comerciais)
+ * - Informações detalhadas de cada local
+ * - Ligação direta e navegação
+ * - Interface disfarçada como app de localização comercial
+ * 
+ * Disfarces:
+ * - "Mercados 24h" = Unidades de Pronto Atendimento
+ * - "Feiras" = Centros de Assistência Social (CREAS/CRAS)
+ * - "Lojas Especializadas" = Delegacias e Centros de Proteção
+ * - "Farmácias" = Unidades de Saúde e CAPS
+ */
 export default function MapScreen() {
   const colorScheme = useColorScheme();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -164,6 +197,9 @@ export default function MapScreen() {
   const [filter, setFilter] = useState<string>('all');
   const [modalVisible, setModalVisible] = useState(false);
 
+  /**
+   * Solicita permissão de localização e obtém posição atual
+   */
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -176,19 +212,36 @@ export default function MapScreen() {
     })();
   }, []);
 
+  // Filtra locais baseado na seleção do usuário
   const filteredLocations = filter === 'all' 
     ? supportLocations 
     : supportLocations.filter(loc => loc.type === filter);
 
+  /**
+   * Abre modal com detalhes do local selecionado
+   * 
+   * @param location - Local selecionado no mapa
+   */
   const handleLocationPress = (location: SupportLocation) => {
     setSelectedLocation(location);
     setModalVisible(true);
   };
 
+  /**
+   * Abre o aplicativo de telefone para ligar
+   * 
+   * @param phone - Número de telefone
+   */
   const handleCall = (phone: string) => {
     Linking.openURL(`tel:${phone}`);
   };
 
+  /**
+   * Abre o aplicativo de mapas para navegação
+   * 
+   * @param latitude - Latitude do destino
+   * @param longitude - Longitude do destino
+   */
   const handleDirections = (latitude: number, longitude: number) => {
     const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
     const latLng = `${latitude},${longitude}`;
@@ -203,6 +256,7 @@ export default function MapScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <ThemedText type="title">Onde Comprar</ThemedText>
         <ThemedText style={styles.subtitle}>
@@ -210,6 +264,7 @@ export default function MapScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Filtros de categoria (disfarçados) */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
@@ -257,6 +312,7 @@ export default function MapScreen() {
         </TouchableOpacity>
       </ScrollView>
 
+      {/* Mapa interativo */}
       {location && (
         <MapView
           style={styles.map}
@@ -267,10 +323,12 @@ export default function MapScreen() {
             longitudeDelta: 0.0421,
           }}
         >
+          {/* Tiles do OpenStreetMap para melhor privacidade */}
           <UrlTile
             urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
             maximumZ={19}
           />
+          {/* Marcadores dos locais de apoio */}
           {filteredLocations.map((location) => (
             <Marker
               key={location.id}
@@ -292,6 +350,7 @@ export default function MapScreen() {
         </MapView>
       )}
 
+      {/* Modal com detalhes do local */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -309,9 +368,11 @@ export default function MapScreen() {
                   <MaterialIcons name="close" size={24} color={colorScheme === 'dark' ? 'white' : 'black'} />
                 </TouchableOpacity>
 
+                {/* Nome disfarçado e real */}
                 <ThemedText style={styles.modalTitle}>{selectedLocation.name}</ThemedText>
                 <ThemedText style={styles.modalSubtitle}>({selectedLocation.realName})</ThemedText>
                 
+                {/* Informações do local */}
                 <ThemedView style={styles.infoRow}>
                   <MaterialIcons name="location-on" size={20} color="#666" />
                   <ThemedText style={styles.infoText}>{selectedLocation.address}</ThemedText>
@@ -327,6 +388,7 @@ export default function MapScreen() {
                   <ThemedText style={styles.infoText}>{selectedLocation.description}</ThemedText>
                 </ThemedView>
 
+                {/* Botões de ação */}
                 <ThemedView style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
@@ -353,6 +415,10 @@ export default function MapScreen() {
   );
 }
 
+/**
+ * Estilos da tela de mapas
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -379,7 +445,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   filterActive: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#FF6B6B', // Cor coral do app
   },
   filterText: {
     fontSize: 14,
@@ -447,13 +513,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderRadius: 8,
+    minWidth: 120,
+    justifyContent: 'center',
   },
   buttonText: {
     color: 'white',
-    marginLeft: 8,
-    fontSize: 16,
     fontWeight: '600',
+    marginLeft: 8,
   },
 });

@@ -2,37 +2,74 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import SecurityService from './security';
 
+/**
+ * Interface para notificações seguras
+ * Permite armazenar tanto o conteúdo real quanto o disfarçado
+ */
 interface SecureNotification {
-  id: string;
-  realTitle: string;
-  culinaryTitle: string;
-  realBody: string;
-  culinaryBody: string;
-  data: any;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  timestamp: Date;
+  id: string;           // Identificador único da notificação
+  realTitle: string;    // Título real da notificação
+  culinaryTitle: string; // Título disfarçado (culinário)
+  realBody: string;     // Corpo real da notificação
+  culinaryBody: string; // Corpo disfarçado (culinário)
+  data: any;            // Dados adicionais da notificação
+  priority: 'low' | 'medium' | 'high' | 'critical'; // Prioridade da notificação
+  timestamp: Date;      // Data/hora da notificação
 }
 
+/**
+ * Configurações de notificação do usuário
+ */
 interface NotificationSettings {
-  enabled: boolean;
-  hideContent: boolean;
-  soundEnabled: boolean;
-  vibrationEnabled: boolean;
-  criticalAlertsOnly: boolean;
+  enabled: boolean;           // Se notificações estão habilitadas
+  hideContent: boolean;       // Se deve ocultar conteúdo real
+  soundEnabled: boolean;      // Se som está habilitado
+  vibrationEnabled: boolean;  // Se vibração está habilitada
+  criticalAlertsOnly: boolean; // Se deve mostrar apenas alertas críticos
 }
 
+/**
+ * Serviço de notificações seguras para o aplicativo Toque de Casa
+ * 
+ * Este serviço implementa um sistema de notificações que pode disfarçar
+ * o conteúdo real com mensagens relacionadas a culinária, permitindo
+ * que o usuário receba alertas de emergência sem revelar a verdadeira
+ * natureza do aplicativo.
+ * 
+ * Funcionalidades:
+ * - Notificações disfarçadas com tema culinário
+ * - Diferentes níveis de prioridade
+ * - Histórico de notificações
+ * - Configurações personalizáveis
+ * - Integração com sistema de segurança
+ * 
+ * Implementa o padrão Singleton
+ */
 class NotificationService {
   private static instance: NotificationService;
+  
+  /**
+   * Configurações padrão de notificação
+   */
   private settings: NotificationSettings = {
     enabled: true,
-    hideContent: true,
-    soundEnabled: false,
-    vibrationEnabled: true,
-    criticalAlertsOnly: false,
+    hideContent: true,        // Por padrão, oculta conteúdo real
+    soundEnabled: false,      // Som desabilitado por padrão
+    vibrationEnabled: true,   // Vibração habilitada por padrão
+    criticalAlertsOnly: false, // Mostra todas as notificações por padrão
   };
+  
+  /**
+   * Histórico das últimas notificações
+   */
   private notificationHistory: SecureNotification[] = [];
 
+  /**
+   * Frases culinárias para disfarçar notificações reais
+   * Organizadas por prioridade e tipo
+   */
   private culinaryPhrases = {
+    // Frases para alertas gerais
     alerts: [
       'Nova receita especial disponível!',
       'Dica quente de culinária',
@@ -40,6 +77,7 @@ class NotificationService {
       'Chef online agora',
       'Receita do dia',
     ],
+    // Frases para lembretes
     reminders: [
       'Hora de preparar o jantar',
       'Não esqueça dos ingredientes',
@@ -47,6 +85,7 @@ class NotificationService {
       'Receita agendada',
       'Tempo de preparo',
     ],
+    // Frases para urgências
     urgent: [
       'Oferta limitada no mercado!',
       'Últimas unidades do ingrediente',
@@ -60,6 +99,9 @@ class NotificationService {
     this.initialize();
   }
 
+  /**
+   * Obtém a instância única do serviço (Singleton)
+   */
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
@@ -67,12 +109,18 @@ class NotificationService {
     return NotificationService.instance;
   }
 
+  /**
+   * Inicializa o serviço carregando configurações e configurando notificações
+   */
   private async initialize() {
     await this.loadSettings();
     await this.setupNotifications();
     this.setupNotificationHandlers();
   }
 
+  /**
+   * Carrega configurações salvas do AsyncStorage
+   */
   private async loadSettings() {
     try {
       const saved = await AsyncStorage.getItem('notificationSettings');
@@ -84,6 +132,9 @@ class NotificationService {
     }
   }
 
+  /**
+   * Salva configurações no AsyncStorage
+   */
   private async saveSettings() {
     try {
       await AsyncStorage.setItem('notificationSettings', JSON.stringify(this.settings));
@@ -92,10 +143,15 @@ class NotificationService {
     }
   }
 
+  /**
+   * Configura os canais de notificação para Android
+   * e solicita permissões necessárias
+   */
   private async setupNotifications() {
     const { status } = await Notifications.requestPermissionsAsync();
     
     if (status === 'granted') {
+      // Canal padrão para notificações normais
       await Notifications.setNotificationChannelAsync('default', {
         name: 'Receitas',
         importance: Notifications.AndroidImportance.DEFAULT,
@@ -104,6 +160,7 @@ class NotificationService {
         sound: null,
       });
 
+      // Canal crítico para notificações de emergência
       await Notifications.setNotificationChannelAsync('critical', {
         name: 'Ofertas Especiais',
         importance: Notifications.AndroidImportance.HIGH,
@@ -114,7 +171,11 @@ class NotificationService {
     }
   }
 
+  /**
+   * Configura handlers para processar notificações recebidas
+   */
   private setupNotificationHandlers() {
+    // Handler para quando a notificação é recebida
     Notifications.setNotificationHandler({
       handleNotification: async (notification) => {
         const shouldShow = this.shouldShowNotification(notification);
@@ -129,16 +190,21 @@ class NotificationService {
       },
     });
 
+    // Handler para quando o usuário interage com a notificação
     Notifications.addNotificationResponseReceivedListener((response) => {
       this.handleNotificationResponse(response);
     });
   }
 
+  /**
+   * Determina se uma notificação deve ser exibida baseado nas configurações
+   */
   private shouldShowNotification(notification: Notifications.Notification): boolean {
     if (!this.settings.enabled) return false;
     
     const priority = notification.request.content.data?.priority || 'low';
     
+    // Se configurado para mostrar apenas alertas críticos
     if (this.settings.criticalAlertsOnly && priority !== 'critical') {
       return false;
     }
@@ -146,22 +212,36 @@ class NotificationService {
     return true;
   }
 
+  /**
+   * Processa a resposta do usuário a uma notificação
+   */
   private handleNotificationResponse(response: Notifications.NotificationResponse) {
     const data = response.notification.request.content.data;
     
     if (data?.action) {
       switch (data.action) {
         case 'emergency':
+          // Ativa modo pânico se for uma notificação de emergência
           SecurityService.panicMode();
           break;
         case 'openChat':
+          // Abrir chat (implementação futura)
           break;
         case 'viewMap':
+          // Abrir mapa (implementação futura)
           break;
       }
     }
   }
 
+  /**
+   * Envia uma notificação segura com conteúdo disfarçado
+   * 
+   * @param realTitle - Título real da notificação
+   * @param realBody - Corpo real da notificação
+   * @param priority - Prioridade da notificação
+   * @param data - Dados adicionais
+   */
   async sendSecureNotification(
     realTitle: string,
     realBody: string,
@@ -170,9 +250,11 @@ class NotificationService {
   ) {
     if (!this.settings.enabled) return;
 
+    // Gera títulos e corpos disfarçados baseados na prioridade
     const culinaryTitle = this.generateCulinaryTitle(priority);
     const culinaryBody = this.generateCulinaryBody(priority);
 
+    // Monta o conteúdo da notificação
     const notificationContent: Notifications.NotificationContentInput = {
       title: this.settings.hideContent ? culinaryTitle : realTitle,
       body: this.settings.hideContent ? culinaryBody : realBody,
@@ -186,6 +268,7 @@ class NotificationService {
       categoryIdentifier: priority === 'critical' ? 'emergency' : 'default',
     };
 
+    // Configurações especiais para notificações críticas
     if (priority === 'critical') {
       notificationContent.badge = 1;
       notificationContent.sound = 'default';
@@ -193,12 +276,14 @@ class NotificationService {
 
     const channelId = priority === 'critical' ? 'critical' : 'default';
 
+    // Agenda a notificação
     await Notifications.scheduleNotificationAsync({
       content: notificationContent,
       trigger: null,
       identifier: `secure_${Date.now()}`,
     });
 
+    // Salva no histórico
     this.saveNotificationToHistory({
       id: Date.now().toString(),
       realTitle,
@@ -211,6 +296,9 @@ class NotificationService {
     });
   }
 
+  /**
+   * Gera um título culinário baseado na prioridade da notificação
+   */
   private generateCulinaryTitle(priority: 'low' | 'medium' | 'high' | 'critical'): string {
     const phrases = priority === 'critical' ? this.culinaryPhrases.urgent :
                    priority === 'high' ? this.culinaryPhrases.alerts :
@@ -219,6 +307,9 @@ class NotificationService {
     return phrases[Math.floor(Math.random() * phrases.length)];
   }
 
+  /**
+   * Gera um corpo culinário baseado na prioridade da notificação
+   */
   private generateCulinaryBody(priority: 'low' | 'medium' | 'high' | 'critical'): string {
     const bodies = {
       low: [
@@ -247,6 +338,12 @@ class NotificationService {
     return options[Math.floor(Math.random() * options.length)];
   }
 
+  /**
+   * Envia alerta de emergência para contatos específicos
+   * 
+   * @param contacts - Lista de contatos para notificar
+   * @param location - Localização opcional para incluir no alerta
+   */
   async sendEmergencyAlert(contacts: string[], location?: { latitude: number; longitude: number }) {
     const message = this.settings.hideContent 
       ? 'Receita especial em andamento! Venha experimentar 🍰'
@@ -260,6 +357,11 @@ class NotificationService {
     );
   }
 
+  /**
+   * Agenda uma notificação de check-in periódico
+   * 
+   * @param intervalHours - Intervalo em horas para o check-in (padrão: 24h)
+   */
   async scheduleCheckIn(intervalHours: number = 24) {
     await Notifications.cancelAllScheduledNotificationsAsync();
 
@@ -277,18 +379,29 @@ class NotificationService {
     });
   }
 
+  /**
+   * Atualiza as configurações de notificação
+   */
   async updateSettings(newSettings: Partial<NotificationSettings>) {
     this.settings = { ...this.settings, ...newSettings };
     await this.saveSettings();
   }
 
+  /**
+   * Obtém as configurações atuais de notificação
+   */
   getSettings(): NotificationSettings {
     return this.settings;
   }
 
+  /**
+   * Salva uma notificação no histórico local
+   * Mantém apenas as últimas 50 notificações
+   */
   private async saveNotificationToHistory(notification: SecureNotification) {
     this.notificationHistory.unshift(notification);
     
+    // Limita o histórico a 50 notificações
     if (this.notificationHistory.length > 50) {
       this.notificationHistory = this.notificationHistory.slice(0, 50);
     }
@@ -300,6 +413,9 @@ class NotificationService {
     }
   }
 
+  /**
+   * Obtém o histórico de notificações
+   */
   async getNotificationHistory(): Promise<SecureNotification[]> {
     try {
       const saved = await AsyncStorage.getItem('notificationHistory');
@@ -313,11 +429,19 @@ class NotificationService {
     return this.notificationHistory;
   }
 
+  /**
+   * Limpa o histórico de notificações
+   */
   async clearNotificationHistory() {
     this.notificationHistory = [];
     await AsyncStorage.removeItem('notificationHistory');
   }
 
+  /**
+   * Envia uma notificação de teste para verificar configurações
+   * 
+   * @param type - Tipo de notificação de teste
+   */
   async testNotification(type: 'low' | 'medium' | 'high' | 'critical') {
     const testMessages = {
       low: {
@@ -343,4 +467,5 @@ class NotificationService {
   }
 }
 
+// Exporta uma instância única do serviço
 export default NotificationService.getInstance();

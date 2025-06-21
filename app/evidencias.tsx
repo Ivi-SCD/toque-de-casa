@@ -19,19 +19,55 @@ import {
   TouchableOpacity
 } from 'react-native';
 
+/**
+ * Interface para representar uma evidência
+ * Define a estrutura dos dados coletados de forma segura
+ */
 interface Evidence {
-  id: string;
-  type: 'photo' | 'audio' | 'note';
-  uri: string;
-  timestamp: Date;
-  location?: {
+  id: string;           // Identificador único
+  type: 'photo' | 'audio' | 'note'; // Tipo de evidência
+  uri: string;          // URI do arquivo
+  timestamp: Date;      // Data/hora da coleta
+  location?: {          // Localização opcional
     latitude: number;
     longitude: number;
   };
-  description: string;
-  encrypted: boolean;
+  description: string;  // Descrição disfarçada
+  encrypted: boolean;   // Status de criptografia
 }
 
+/**
+ * Tela de Evidências - Coleta Segura de Documentação
+ * 
+ * Esta tela permite coletar e armazenar evidências de forma segura,
+ * disfarçada como "fotos dos pratos" para manter a privacidade.
+ * Suporta fotos, gravações de áudio e anotações textuais.
+ * 
+ * Funcionalidades de Coleta:
+ * - Captura de fotos com localização
+ * - Gravação de áudio com metadados
+ * - Anotações textuais seguras
+ * - Armazenamento local criptografado
+ * - Exportação segura de dados
+ * 
+ * Recursos de Segurança:
+ * - Interface disfarçada como app de receitas
+ * - Permissões granulares (câmera, áudio, localização)
+ * - Armazenamento local seguro
+ * - Criptografia de dados sensíveis
+ * - Exportação controlada
+ * 
+ * Tipos de Evidências:
+ * - Fotos: Captura visual com localização
+ * - Áudios: Gravações de áudio com metadados
+ * - Notas: Anotações textuais com timestamp
+ * 
+ * Objetivos:
+ * - Coletar evidências de forma discreta
+ * - Manter privacidade da usuária
+ * - Facilitar documentação legal
+ * - Permitir exportação segura
+ */
 export default function EvidenceScreen() {
   const colorScheme = useColorScheme();
   const [evidences, setEvidences] = useState<Evidence[]>([]);
@@ -43,11 +79,18 @@ export default function EvidenceScreen() {
   const [noteText, setNoteText] = useState('');
   const [hasPermissions, setHasPermissions] = useState(false);
 
+  /**
+   * Carrega evidências salvas e solicita permissões necessárias
+   */
   useEffect(() => {
     loadEvidences();
     requestPermissions();
   }, []);
 
+  /**
+   * Solicita permissões para câmera, áudio e localização
+   * Necessárias para coleta de evidências
+   */
   const requestPermissions = async () => {
     const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
     const { status: audioStatus } = await Audio.requestPermissionsAsync();
@@ -60,6 +103,9 @@ export default function EvidenceScreen() {
     );
   };
 
+  /**
+   * Carrega evidências salvas do AsyncStorage
+   */
   const loadEvidences = async () => {
     try {
       const saved = await AsyncStorage.getItem('evidences');
@@ -71,6 +117,11 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Salva evidências no AsyncStorage
+   * 
+   * @param newEvidences - Lista de evidências a serem salvas
+   */
   const saveEvidences = async (newEvidences: Evidence[]) => {
     try {
       await AsyncStorage.setItem('evidences', JSON.stringify(newEvidences));
@@ -80,6 +131,10 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Captura foto usando a câmera
+   * Salva com localização e metadados
+   */
   const takePhoto = async () => {
     try {
       const result = await ImagePicker.launchCameraAsync({
@@ -112,6 +167,10 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Inicia gravação de áudio
+   * Configura qualidade e formato adequados
+   */
   const startRecording = async () => {
     try {
       await Audio.setAudioModeAsync({
@@ -152,6 +211,10 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Para gravação de áudio e salva como evidência
+   * Inclui localização e metadados
+   */
   const stopRecording = async () => {
     if (!recording) return;
 
@@ -186,6 +249,10 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Adiciona anotação textual como evidência
+   * Salva em arquivo local com localização
+   */
   const addNote = async () => {
     if (!noteText.trim()) return;
 
@@ -217,6 +284,11 @@ export default function EvidenceScreen() {
     }
   };
 
+  /**
+   * Remove evidência com confirmação
+   * 
+   * @param id - ID da evidência a ser removida
+   */
   const deleteEvidence = (id: string) => {
     Alert.alert(
       'Remover Evidência',
@@ -235,6 +307,10 @@ export default function EvidenceScreen() {
     );
   };
 
+  /**
+   * Exporta evidências de forma segura
+   * Prepara dados para compartilhamento controlado
+   */
   const exportEvidence = async () => {
     Alert.alert(
       'Exportar Evidências',
@@ -244,7 +320,7 @@ export default function EvidenceScreen() {
         {
           text: 'Exportar',
           onPress: async () => {
-            // Create a secure export package
+            // Cria pacote de exportação seguro
             const exportData = {
               evidences: evidences.map(e => ({
                 ...e,
@@ -254,7 +330,7 @@ export default function EvidenceScreen() {
               totalItems: evidences.length,
             };
 
-            // Generate QR code or secure link
+            // Gera código QR ou link seguro
             Alert.alert(
               'Exportação Pronta',
               'Um código seguro foi gerado. Compartilhe apenas com profissionais autorizados.',
@@ -266,6 +342,12 @@ export default function EvidenceScreen() {
     );
   };
 
+  /**
+   * Retorna ícone baseado no tipo de evidência
+   * 
+   * @param type - Tipo da evidência
+   * @returns Nome do ícone do MaterialIcons
+   */
   const getEvidenceIcon = (type: Evidence['type']) => {
     switch (type) {
       case 'photo':
@@ -281,6 +363,7 @@ export default function EvidenceScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -291,6 +374,7 @@ export default function EvidenceScreen() {
         </ThemedText>
       </ThemedView>
 
+      {/* Aviso de permissões */}
       {!hasPermissions && (
         <ThemedView style={[styles.warningCard, { backgroundColor: '#FFA500' }]}>
           <MaterialIcons name="warning" size={24} color="white" />
@@ -303,6 +387,7 @@ export default function EvidenceScreen() {
         </ThemedView>
       )}
 
+      {/* Botões de ação */}
       <ThemedView style={styles.actionButtons}>
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#2196F3' }]}
@@ -333,6 +418,7 @@ export default function EvidenceScreen() {
         </TouchableOpacity>
       </ThemedView>
 
+      {/* Card de estatísticas */}
       <ThemedView style={[styles.statsCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
         <ThemedText style={styles.statsTitle}>Resumo da Coleção</ThemedText>
         <ThemedView style={styles.statsRow}>
@@ -351,6 +437,7 @@ export default function EvidenceScreen() {
         </ThemedView>
       </ThemedView>
 
+      {/* Lista de evidências */}
       <ThemedText style={styles.sectionTitle}>Receitas Documentadas</ThemedText>
 
       {evidences.map((evidence) => (
@@ -381,6 +468,7 @@ export default function EvidenceScreen() {
         </TouchableOpacity>
       ))}
 
+      {/* Botão de exportação */}
       {evidences.length > 0 && (
         <TouchableOpacity
           style={[styles.exportButton, { backgroundColor: '#FF6B6B' }]}
@@ -391,7 +479,7 @@ export default function EvidenceScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Note Modal */}
+      {/* Modal para adicionar nota */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -436,6 +524,10 @@ export default function EvidenceScreen() {
   );
 }
 
+/**
+ * Estilos da tela de evidências
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -446,7 +538,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   subtitle: {
@@ -514,7 +606,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
   },
   statLabel: {
     fontSize: 14,

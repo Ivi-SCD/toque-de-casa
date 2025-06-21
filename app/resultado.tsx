@@ -12,19 +12,50 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+/**
+ * Interface para representar uma ação recomendada
+ * Define a estrutura das ações sugeridas baseadas no nível de risco
+ */
 interface RecommendedAction {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  route: string;
-  priority: 'high' | 'medium' | 'low';
+  id: string;           // Identificador único
+  title: string;        // Título da ação
+  description: string;  // Descrição da ação
+  icon: string;         // Ícone do MaterialIcons
+  route: string;        // Rota de navegação
+  priority: 'high' | 'medium' | 'low'; // Prioridade da ação
 }
 
+/**
+ * Tela de Resultado - Apresentação Personalizada dos Resultados
+ * 
+ * Esta tela apresenta os resultados da avaliação de risco de forma
+ * disfarçada como resultados de um "checklist culinário", fornecendo
+ * orientações personalizadas e próximos passos baseados no nível de risco.
+ * 
+ * Funcionalidades:
+ * - Apresentação visual do nível de risco
+ * - Dicas personalizadas baseadas na pontuação
+ * - Ações recomendadas por prioridade
+ * - Plano de segurança gerado por IA
+ * - Compartilhamento discreto de resultados
+ * - Navegação para funcionalidades específicas
+ * 
+ * Níveis de Risco e Disfarces:
+ * - Alto = "Iniciante na Cozinha" (vermelho)
+ * - Moderado = "Cozinheira em Desenvolvimento" (laranja)
+ * - Baixo = "Chef Experiente" (verde)
+ * 
+ * Recursos Especiais:
+ * - Plano de segurança gerado por IA para risco alto
+ * - Ações imediatas para situações críticas
+ * - Recursos locais disponíveis
+ * - Mensagens motivacionais personalizadas
+ */
 export default function ResultScreen() {
   const colorScheme = useColorScheme();
   const localParams = useLocalSearchParams();
 
+  // Processa parâmetros recebidos da tela de avaliação
   const params = useMemo(() => ({
     score: Array.isArray(localParams.score) ? localParams.score[0] : localParams.score,
     riskLevel: Array.isArray(localParams.riskLevel) ? localParams.riskLevel[0] : localParams.riskLevel,
@@ -35,6 +66,9 @@ export default function ResultScreen() {
   const [recommendedActions, setRecommendedActions] = useState<RecommendedAction[]>([]);
   const [safetyPlan, setSafetyPlan] = useState<any>(null);
 
+  /**
+   * Inicializa a tela com os dados recebidos
+   */
   useEffect(() => {
     if (params.tips) {
       setTips(JSON.parse(params.tips));
@@ -42,9 +76,14 @@ export default function ResultScreen() {
     loadRecommendations();
   }, [params]);
 
+  /**
+   * Carrega recomendações baseadas no nível de risco
+   * Gera plano de segurança via IA para casos de alto risco
+   */
   const loadRecommendations = async () => {
     const riskLevel = params.riskLevel || 'baixo';
     
+    // Gera plano de segurança personalizado via IA
     const aiPlan = await AIService.generateSafetyPlan(riskLevel, {
       riskLevel,
       location: 'Ceilândia',
@@ -53,6 +92,7 @@ export default function ResultScreen() {
 
     let actions: RecommendedAction[] = [];
 
+    // Define ações baseadas no nível de risco
     if (riskLevel === 'alto') {
       actions = [
         {
@@ -139,6 +179,10 @@ export default function ResultScreen() {
     setRecommendedActions(actions);
   };
 
+  /**
+   * Compartilha resultados de forma discreta
+   * Usa linguagem culinária para manter o disfarce
+   */
   const shareResults = async () => {
     const message = `
 🍳 Resultado do Checklist Culinário 🍳
@@ -162,6 +206,11 @@ Baixe o Toque de Casa para mais receitas!
     }
   };
 
+  /**
+   * Converte nível de risco em texto disfarçado
+   * 
+   * @returns Texto disfarçado do nível de risco
+   */
   const getRiskLevelText = () => {
     switch (params.riskLevel) {
       case 'alto':
@@ -175,19 +224,29 @@ Baixe o Toque de Casa para mais receitas!
     }
   };
 
+  /**
+   * Retorna cor baseada no nível de risco
+   * 
+   * @returns Cor hexadecimal para o nível de risco
+   */
   const getRiskLevelColor = () => {
     switch (params.riskLevel) {
       case 'alto':
-        return '#FF0000';
+        return '#FF0000'; // Vermelho para alto risco
       case 'moderado':
-        return '#FFA500';
+        return '#FFA500'; // Laranja para risco moderado
       case 'baixo':
-        return '#4CAF50';
+        return '#4CAF50'; // Verde para baixo risco
       default:
         return '#999';
     }
   };
 
+  /**
+   * Retorna emoji baseado no nível de risco
+   * 
+   * @returns Emoji representativo do nível de risco
+   */
   const getRiskLevelIcon = () => {
     switch (params.riskLevel) {
       case 'alto':
@@ -203,6 +262,7 @@ Baixe o Toque de Casa para mais receitas!
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FAFAFA' }]}>
+      {/* Cabeçalho da tela */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ThemedText style={styles.backButton}>← Voltar</ThemedText>
@@ -210,12 +270,14 @@ Baixe o Toque de Casa para mais receitas!
         <ThemedText type="title">Resultado do Checklist</ThemedText>
       </ThemedView>
 
+      {/* Card principal com resultado */}
       <ThemedView style={[styles.riskCard, { backgroundColor: getRiskLevelColor() }]}>
         <ThemedText style={styles.riskIcon}>{getRiskLevelIcon()}</ThemedText>
         <ThemedText style={styles.riskLevel}>{getRiskLevelText()}</ThemedText>
         <ThemedText style={styles.riskScore}>Pontuação: {params.score}/75</ThemedText>
       </ThemedView>
 
+      {/* Seção de dicas personalizadas */}
       <ThemedView style={[styles.section, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
         <ThemedText style={styles.sectionTitle}>Dicas Personalizadas</ThemedText>
         {tips.map((tip, index) => (
@@ -226,6 +288,7 @@ Baixe o Toque de Casa para mais receitas!
         ))}
       </ThemedView>
 
+      {/* Seção de ações imediatas para alto risco */}
       {params.riskLevel === 'alto' && safetyPlan && (
         <ThemedView style={[styles.urgentSection, { backgroundColor: '#FF6B6B' }]}>
           <ThemedText style={styles.urgentTitle}>Ações Imediatas</ThemedText>
@@ -238,6 +301,7 @@ Baixe o Toque de Casa para mais receitas!
         </ThemedView>
       )}
 
+      {/* Seção de próximos passos recomendados */}
       <ThemedView style={styles.actionsSection}>
         <ThemedText style={styles.sectionTitle}>Próximos Passos Recomendados</ThemedText>
         
@@ -265,6 +329,7 @@ Baixe o Toque de Casa para mais receitas!
         ))}
       </ThemedView>
 
+      {/* Seção de recursos disponíveis */}
       {safetyPlan && safetyPlan.resources.length > 0 && (
         <ThemedView style={[styles.section, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : 'white' }]}>
           <ThemedText style={styles.sectionTitle}>Recursos Disponíveis</ThemedText>
@@ -277,6 +342,7 @@ Baixe o Toque de Casa para mais receitas!
         </ThemedView>
       )}
 
+      {/* Botões de ação */}
       <ThemedView style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: '#4CAF50' }]}
@@ -295,6 +361,7 @@ Baixe o Toque de Casa para mais receitas!
         </TouchableOpacity>
       </ThemedView>
 
+      {/* Card motivacional personalizado */}
       <ThemedView style={[styles.motivationalCard, { backgroundColor: '#F5F5F5' }]}>
         <MaterialIcons name="favorite" size={24} color="#FF6B6B" />
         <ThemedText style={styles.motivationalText}>
@@ -309,6 +376,10 @@ Baixe o Toque de Casa para mais receitas!
   );
 }
 
+/**
+ * Estilos da tela de resultado
+ * Define a aparência visual de todos os elementos
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -319,7 +390,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 16,
-    color: '#FF6B6B',
+    color: '#FF6B6B', // Cor coral do app
     marginBottom: 10,
   },
   riskCard: {
@@ -455,17 +526,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   motivationalCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     margin: 20,
     padding: 20,
     borderRadius: 12,
+    alignItems: 'center',
   },
   motivationalText: {
-    flex: 1,
-    marginLeft: 15,
     fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
     lineHeight: 22,
-    fontStyle: 'italic',
   },
 });
